@@ -1,10 +1,10 @@
 module EmailConcern
   extend ActiveSupport::Concern
 
-  MAIN_KEYS = %w[title message text main value]
+  MAIN_KEYS = %w(title message text main value)
 
   included do
-    self.validate :validate_email_options
+    validate :validate_email_options
   end
 
   def validate_email_options
@@ -40,16 +40,16 @@ module EmailConcern
     if payload.is_a?(Hash)
       payload = ActiveSupport::HashWithIndifferentAccess.new(payload)
       MAIN_KEYS.each do |key|
-        return { :title => payload[key].to_s, :entries => present_hash(payload, key) } if payload.has_key?(key)
+        return { title: payload[key].to_s, entries: present_hash(payload, key) } if payload.key?(key)
       end
 
-      { :title => "Event", :entries => present_hash(payload) }
+      { title: "Event", entries: present_hash(payload) }
     else
-      { :title => payload.to_s, :entries => [] }
+      { title: payload.to_s, entries: [] }
     end
   end
 
   def present_hash(hash, skip_key = nil)
-    hash.to_a.sort_by {|a| a.first.to_s }.map { |k, v| "#{k}: #{v}" unless k.to_s == skip_key.to_s }.compact
+    hash.to_a.sort_by { |a| a.first.to_s }.map { |k, v| "#{k}: #{v}" unless k.to_s == skip_key.to_s }.compact
   end
 end

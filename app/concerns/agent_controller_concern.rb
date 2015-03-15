@@ -7,7 +7,7 @@ module AgentControllerConcern
 
   def default_options
     {
-      'action' => 'run',
+      'action' => 'run'
     }
   end
 
@@ -18,11 +18,11 @@ module AgentControllerConcern
   def validate_control_action
     case options['action']
     when 'run'
-      control_targets.each { |target|
+      control_targets.each do |target|
         if target.cannot_be_scheduled?
           errors.add(:base, "#{target.name} cannot be scheduled")
         end
-      }
+      end
     when 'configure'
       if options['configure_options'].nil? || options['configure_options'].keys.length == 0
         errors.add(:base, "The 'configure_options' options hash must be supplied when using the 'configure' action.")
@@ -38,7 +38,7 @@ module AgentControllerConcern
   end
 
   def control!
-    control_targets.each { |target|
+    control_targets.each do |target|
       begin
         case control_action
         when 'run'
@@ -78,6 +78,6 @@ module AgentControllerConcern
       rescue => e
         error "Failed to #{control_action} '#{target.name}': #{e.message}"
       end
-    }
+    end
   end
 end

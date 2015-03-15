@@ -67,7 +67,7 @@ module Agents
             this.memory('callCount', callCount + 1);
           }
         };
-        
+
         Agent.receive = function() {
           var events = this.incomingEvents();
           for(var i = 0; i < events.length; i++) {
@@ -90,12 +90,12 @@ module Agents
       context = V8::Context.new
       context.eval(setup_javascript)
 
-      context["doCreateEvent"] = lambda { |a, y| create_event(payload: clean_nans(JSON.parse(y))).payload.to_json }
-      context["getIncomingEvents"] = lambda { |a| incoming_events.to_json }
-      context["getOptions"] = lambda { |a, x| interpolated.to_json }
-      context["doLog"] = lambda { |a, x| log x }
-      context["doError"] = lambda { |a, x| error x }
-      context["getMemory"] = lambda do |a, x, y|
+      context["doCreateEvent"] = ->(_a, y) { create_event(payload: clean_nans(JSON.parse(y))).payload.to_json }
+      context["getIncomingEvents"] = ->(_a) { incoming_events.to_json }
+      context["getOptions"] = ->(_a, _x) { interpolated.to_json }
+      context["doLog"] = ->(_a, x) { log x }
+      context["doError"] = ->(_a, x) { error x }
+      context["getMemory"] = lambda do |_a, x, y|
         if x && y
           memory[x] = clean_nans(y)
         else
@@ -117,7 +117,7 @@ module Agents
     end
 
     def credential_referenced_by_code
-      interpolated['code'] =~ /\Acredential:(.*)\Z/ && $1
+      interpolated['code'] =~ /\Acredential:(.*)\Z/ && Regexp.last_match(1)
     end
 
     def setup_javascript
@@ -164,16 +164,14 @@ module Agents
     end
 
     def log_errors
-      begin
-        yield
-      rescue V8::Error => e
-        error "JavaScript error: #{e.message}"
-      end
+      yield
+    rescue V8::Error => e
+      error "JavaScript error: #{e.message}"
     end
 
     def clean_nans(input)
       if input.is_a?(Array)
-        input.map {|v| clean_nans(v) }
+        input.map { |v| clean_nans(v) }
       elsif input.is_a?(Hash)
         input.inject({}) { |m, (k, v)| m[k] = clean_nans(v); m }
       elsif input.is_a?(Float) && input.nan?

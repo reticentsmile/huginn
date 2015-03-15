@@ -42,11 +42,11 @@ module Agents
       incoming_events.each do |event|
         Utils.values_at(event.payload, interpolated['content']).each do |content|
           sent_values = sentiment_values anew, content
-          create_event :payload => { 'content' => content,
-                                     'valence' => sent_values[0],
-                                     'arousal' => sent_values[1],
-                                     'dominance' => sent_values[2],
-                                     'original_event' => event.payload }
+          create_event payload: { 'content' => content,
+                                  'valence' => sent_values[0],
+                                  'arousal' => sent_values[1],
+                                  'dominance' => sent_values[2],
+                                  'original_event' => event.payload }
         end
       end
     end
@@ -56,19 +56,19 @@ module Agents
     end
 
     def self.sentiment_hash
-      unless self.anew
+      unless anew
         self.anew = {}
         CSV.foreach Rails.root.join('data/anew.csv') do |row|
-          self.anew[row[0]] = row.values_at(2, 4, 6).map { |val| val.to_f }
+          anew[row[0]] = row.values_at(2, 4, 6).map(&:to_f)
         end
       end
-      self.anew
+      anew
     end
 
     def sentiment_values(anew, text)
       valence, arousal, dominance, freq = [0] * 4
       text.downcase.strip.gsub(/[^a-z ]/, "").split.each do |word|
-        if anew.has_key? word
+        if anew.key? word
           valence += anew[word][0]
           arousal += anew[word][1]
           dominance += anew[word][2]
@@ -76,7 +76,7 @@ module Agents
         end
       end
       if valence != 0
-        [valence/freq, arousal/freq, dominance/freq]
+        [valence / freq, arousal / freq, dominance / freq]
       else
         ["Insufficient data for meaningful answer"] * 3
       end

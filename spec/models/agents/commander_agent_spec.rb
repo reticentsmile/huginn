@@ -6,8 +6,8 @@ describe Agents::CommanderAgent do
       name: 'Example',
       schedule: 'every_1h',
       options: {
-        'action' => 'run',
-      },
+        'action' => 'run'
+      }
     }
   }
 
@@ -34,7 +34,7 @@ describe Agents::CommanderAgent do
       event.agent = agents(:bob_rain_notifier_agent)
       event.payload = {
         'url' => 'http://xkcd.com',
-        'link' => 'Random',
+        'link' => 'Random'
       }
       agent.receive([event])
     end

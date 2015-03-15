@@ -1,4 +1,4 @@
-# encoding: utf-8 
+# encoding: utf-8
 require "json"
 
 module Agents
@@ -113,13 +113,12 @@ module Agents
       end
     end
 
-
     def check
       last_message = memory['last_message']
 
       mqtt_client.connect do |c|
         begin
-          Timeout.timeout((interpolated['max_read_time'].presence || 15).to_i) {
+          Timeout.timeout((interpolated['max_read_time'].presence || 15).to_i) do
             c.get_packet(interpolated['topic']) do |packet|
               topic, payload = message = [packet.topic, packet.payload]
 
@@ -140,15 +139,14 @@ module Agents
                 'time' => Time.now.to_i
               }
             end
-          }
+          end
         rescue Timeout::Error
         end
       end
 
       # Remember the last original (non-retain, non-duplicate) message
-      self.memory['last_message'] = last_message
+      memory['last_message'] = last_message
       save!
     end
-
   end
 end

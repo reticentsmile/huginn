@@ -2,7 +2,7 @@ require 'spec_helper'
 
 shared_examples_for WebRequestConcern do
   let(:agent) do
-    _agent = described_class.new(:name => "some agent", :options => @valid_options || {})
+    _agent = described_class.new(name: "some agent", options: @valid_options || {})
     _agent.user = users(:jane)
     _agent
   end
@@ -47,7 +47,7 @@ shared_examples_for WebRequestConcern do
       agent.options['basic_auth'] = "foo:bar"
       expect(agent).to be_valid
 
-      agent.options['basic_auth'] = ["foo", "bar"]
+      agent.options['basic_auth'] = %w(foo bar)
       expect(agent).to be_valid
 
       agent.options['basic_auth'] = ""

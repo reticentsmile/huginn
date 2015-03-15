@@ -64,24 +64,24 @@ module Agents
     end
 
     def send_message(message)
-      client.account.sms.messages.create :from => interpolated['sender_cell'],
-                                         :to => interpolated['receiver_cell'],
-                                         :body => message
+      client.account.sms.messages.create from: interpolated['sender_cell'],
+                                         to: interpolated['receiver_cell'],
+                                         body: message
     end
 
     def make_call(secret)
-      client.account.calls.create :from => interpolated['sender_cell'],
-                                  :to => interpolated['receiver_cell'],
-                                  :url => post_url(interpolated['server_url'], secret)
+      client.account.calls.create from: interpolated['sender_cell'],
+                                  to: interpolated['receiver_cell'],
+                                  url: post_url(interpolated['server_url'], secret)
     end
 
     def post_url(server_url, secret)
       "#{server_url}/users/#{user.id}/web_requests/#{id}/#{secret}"
     end
 
-    def receive_web_request(params, method, format)
-      if memory['pending_calls'].has_key? params['secret']
-        response = Twilio::TwiML::Response.new {|r| r.Say memory['pending_calls'][params['secret']], :voice => 'woman'}
+    def receive_web_request(params, _method, _format)
+      if memory['pending_calls'].key? params['secret']
+        response = Twilio::TwiML::Response.new { |r| r.Say memory['pending_calls'][params['secret']], voice: 'woman' }
         memory['pending_calls'].delete params['secret']
         [response.text, 200]
       end

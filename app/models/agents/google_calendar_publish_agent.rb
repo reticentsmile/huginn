@@ -34,7 +34,7 @@ module Agents
 
       `google` `key_secret` - The secret for the key, typically 'notasecret'
 
-      
+
 
       Set `expected_update_period_in_days` to the maximum amount of time that you'd expect to pass between Events being created by this Agent.
 
@@ -90,12 +90,12 @@ module Agents
     end
 
     def receive(incoming_events)
-     incoming_events.each do |event|
+      incoming_events.each do |event|
         calendar = GoogleCalendar.new(options, Rails.logger)
 
         calendar_event = JSON.parse(calendar.publish_as(options['calendar_id'], event.payload["message"]).response.body)
-  
-        create_event :payload => {
+
+        create_event payload: {
           'success' => true,
           'published_calendar_event' => calendar_event,
           'agent_id' => event.agent_id,
@@ -105,4 +105,3 @@ module Agents
     end
   end
 end
-

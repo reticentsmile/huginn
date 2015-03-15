@@ -114,13 +114,13 @@ module Agents
 
     IDCACHE_SIZE = 100
 
-    FNM_FLAGS = [:FNM_CASEFOLD, :FNM_EXTGLOB].inject(0) { |flags, sym|
+    FNM_FLAGS = [:FNM_CASEFOLD, :FNM_EXTGLOB].inject(0) do |flags, sym|
       if File.const_defined?(sym)
         flags | File.const_get(sym)
       else
         flags
       end
-    }
+    end
 
     def working?
       event_created_within?(interpolated['expected_update_period_in_days']) && !recent_error_logs?
@@ -133,35 +133,35 @@ module Agents
         'ssl' => true,
         'username' => 'your.account',
         'password' => 'your.password',
-        'folders' => %w[INBOX],
+        'folders' => %w(INBOX),
         'conditions' => {}
       }
     end
 
     def validate_options
-      %w[host username password].each { |key|
-        String === options[key] or
+      %w(host username password).each do |key|
+        String === options[key] ||
           errors.add(:base, '%s is required and must be a string' % key)
-      }
+      end
 
       if options['port'].present?
         errors.add(:base, "port must be a positive integer") unless is_positive_integer?(options['port'])
       end
 
-      %w[ssl mark_as_read].each { |key|
+      %w(ssl mark_as_read).each do |key|
         if options[key].present?
           if boolify(options[key]).nil?
             errors.add(:base, '%s must be a boolean value' % key)
           end
         end
-      }
+      end
 
       case mime_types = options['mime_types']
       when nil
       when Array
-        mime_types.all? { |mime_type|
+        mime_types.all? do |mime_type|
           String === mime_type && mime_type.start_with?('text/')
-        } or errors.add(:base, 'mime_types may only contain strings that match "text/*".')
+        end || errors.add(:base, 'mime_types may only contain strings that match "text/*".')
         if mime_types.empty?
           errors.add(:base, 'mime_types should not be empty')
         end
@@ -172,9 +172,9 @@ module Agents
       case folders = options['folders']
       when nil
       when Array
-        folders.all? { |folder|
+        folders.all? do |folder|
           String === folder
-        } or errors.add(:base, 'folders may only contain strings')
+        end || errors.add(:base, 'folders may only contain strings')
         if folders.empty?
           errors.add(:base, 'folders should not be empty')
         end
@@ -184,8 +184,8 @@ module Agents
 
       case conditions = options['conditions']
       when Hash
-        conditions.each { |key, value|
-          value.present? or next
+        conditions.each do |key, value|
+          value.present? || next
           case key
           when 'subject', 'body'
             case value
@@ -199,7 +199,7 @@ module Agents
               errors.add(:base, 'conditions.%s contains a non-string object' % key)
             end
           when 'from', 'to', 'cc'
-            Array(value).each { |pattern|
+            Array(value).each do |pattern|
               case pattern
               when String
                 begin
@@ -210,7 +210,7 @@ module Agents
               else
                 errors.add(:base, 'conditions.%s contains a non-string object' % key)
               end
-            }
+            end
           when 'is_unread', 'has_attachment'
             case boolify(value)
             when true, false
@@ -218,7 +218,7 @@ module Agents
               errors.add(:base, 'conditions.%s must be a boolean value or null' % key)
             end
           end
-        }
+        end
       else
         errors.add(:base, 'conditions must be a hash')
       end
@@ -229,21 +229,21 @@ module Agents
     end
 
     def check
-      each_unread_mail { |mail, notified|
+      each_unread_mail do |mail, notified|
         message_id = mail.message_id
         body_parts = mail.body_parts(mime_types)
         matched_part = nil
         matches = {}
 
-        interpolated['conditions'].all? { |key, value|
+        interpolated['conditions'].all? do |key, value|
           case key
           when 'subject'
             value.present? or next true
             re = Regexp.new(value)
             if m = re.match(mail.subject)
-              m.names.each { |name|
+              m.names.each do |name|
                 matches[name] = m[name]
-              }
+              end
               true
             else
               false
@@ -251,23 +251,23 @@ module Agents
           when 'body'
             value.present? or next true
             re = Regexp.new(value)
-            matched_part = body_parts.find { |part|
-               if m = re.match(part.decoded)
-                 m.names.each { |name|
-                   matches[name] = m[name]
-                 }
-                 true
-               else
-                 false
-               end
-            }
+            matched_part = body_parts.find do |part|
+              if m = re.match(part.decoded)
+                m.names.each do |name|
+                  matches[name] = m[name]
+                end
+                true
+              else
+                false
+              end
+            end
           when 'from', 'to', 'cc'
             value.present? or next true
-            mail.header[key].addresses.any? { |address|
-              Array(value).any? { |pattern|
+            mail.header[key].addresses.any? do |address|
+              Array(value).any? do |pattern|
                 glob_match?(pattern, address)
-              }
-            }
+              end
+            end
           when 'has_attachment'
             boolify(value) == mail.has_attachment?
           when 'is_unread'
@@ -276,7 +276,7 @@ module Agents
             log 'Unknown condition key ignored: %s' % key
             true
           end
-        } or next
+        end || next
 
         if notified.include?(mail.message_id)
           log 'Ignoring mail: %s (already notified)' % message_id
@@ -293,7 +293,7 @@ module Agents
 
           log 'Emitting an event for mail: %s' % message_id
 
-          create_event :payload => {
+          create_event payload: {
             'folder' => mail.folder,
             'subject' => mail.subject,
             'from' => mail.from_addrs.first,
@@ -303,7 +303,7 @@ module Agents
             'mime_type' => mime_type,
             'body' => body,
             'matches' => matches,
-            'has_attachment' => mail.has_attachment?,
+            'has_attachment' => mail.has_attachment?
           }
 
           notified << mail.message_id if mail.message_id
@@ -313,7 +313,7 @@ module Agents
           log 'Marking as read'
           mail.mark_as_read
         end
-      }
+      end
     end
 
     def each_unread_mail
@@ -322,18 +322,18 @@ module Agents
       port = (Integer(port) if port.present?)
 
       log "Connecting to #{host}#{':%d' % port if port}#{' via SSL' if ssl}"
-      Client.open(host, port, ssl) { |imap|
+      Client.open(host, port, ssl) do |imap|
         log "Logging in as #{username}"
         imap.login(username, interpolated[:password])
 
         # 'lastseen' keeps a hash of { uidvalidity => lastseenuid, ... }
-        lastseen, seen = self.lastseen, self.make_seen
+        lastseen, seen = self.lastseen, make_seen
 
         # 'notified' keeps an array of message-ids of {IDCACHE_SIZE}
         # most recent notified mails.
         notified = self.notified
 
-        interpolated['folders'].each { |folder|
+        interpolated['folders'].each do |folder|
           log "Selecting the folder: %s" % folder
 
           imap.select(folder)
@@ -357,7 +357,7 @@ module Agents
           is_unread = boolify(interpolated['conditions']['is_unread'])
 
           uids = imap.uid_fetch((lastseenuid + 1)..-1, 'FLAGS').
-                 each_with_object([]) { |data, ret|
+                 each_with_object([]) do |data, ret|
             uid, flags = data.attr.values_at('UID', 'FLAGS')
             seen[uidvalidity] = uid
             next if uid <= lastseenuid
@@ -366,7 +366,7 @@ module Agents
             when nil, !flags.include?(:Seen)
               ret << uid
             end
-          }
+          end
 
           log pluralize(uids.size,
                         case is_unread
@@ -380,29 +380,29 @@ module Agents
 
           next if uids.empty?
 
-          imap.uid_fetch_mails(uids).each { |mail|
+          imap.uid_fetch_mails(uids).each do |mail|
             yield mail, notified
-          }
-        }
+          end
+        end
 
         self.notified = notified
         self.lastseen = seen
 
         save!
-      }
+      end
     ensure
       log 'Connection closed'
     end
 
     def mime_types
-      interpolated['mime_types'] || %w[text/plain text/enriched text/html]
+      interpolated['mime_types'] || %w(text/plain text/enriched text/html)
     end
 
     def lastseen
       Seen.new(memory['lastseen'])
     end
 
-    def lastseen= value
+    def lastseen=(value)
       memory.delete('seen')  # obsolete key
       memory['lastseen'] = value
     end
@@ -415,7 +415,7 @@ module Agents
       Notified.new(memory['notified'])
     end
 
-    def notified= value
+    def notified=(value)
       memory['notified'] = value
     end
 
@@ -462,9 +462,9 @@ module Agents
       end
 
       def uid_fetch_mails(set)
-        uid_fetch(set, 'RFC822.HEADER').map { |data|
+        uid_fetch(set, 'RFC822.HEADER').map do |data|
           Message.new(self, data, folder: @folder, uidvalidity: @uidvalidity)
-        }
+        end
       end
     end
 
@@ -473,9 +473,9 @@ module Agents
         super()
         if hash
           # Deserialize a JSON hash which keys are strings
-          hash.each { |uidvalidity, uid|
+          hash.each do |uidvalidity, uid|
             self[uidvalidity.to_i] = uid
-          }
+          end
         end
       end
 
@@ -500,15 +500,15 @@ module Agents
     end
 
     class Message < SimpleDelegator
-      DEFAULT_BODY_MIME_TYPES = %w[text/plain text/enriched text/html]
+      DEFAULT_BODY_MIME_TYPES = %w(text/plain text/enriched text/html)
 
       attr_reader :uid, :folder, :uidvalidity
 
       def initialize(client, fetch_data, props = {})
         @client = client
-        props.each { |key, value|
+        props.each do |key, value|
           instance_variable_set(:"@#{key}", value)
-        }
+        end
         attr = fetch_data.attr
         @uid = attr['UID']
         super(Mail.read_from_string(attr['RFC822.HEADER']))
@@ -538,10 +538,10 @@ module Agents
           mail.all_parts
         else
           [mail]
-        end.reject { |part|
+        end.reject do |part|
           part.multipart? || part.attachment? || !part.text? ||
             !mime_types.include?(part.mime_type)
-        }
+        end
       end
 
       def mark_as_read
@@ -553,9 +553,9 @@ module Agents
       def struct_has_attachment?(struct)
         struct.multipart? && (
           struct.subtype == 'MIXED' ||
-          struct.parts.any? { |part|
+          struct.parts.any? do |part|
             struct_has_attachment?(part)
-          }
+          end
         )
       end
     end

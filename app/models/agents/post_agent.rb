@@ -56,11 +56,11 @@ module Agents
         errors.add(:base, "if provided, payload must be a hash")
       end
 
-      unless %w[post get put delete patch].include?(method)
+      unless %w(post get put delete patch).include?(method)
         errors.add(:base, "method must be 'post', 'get', 'put', 'delete', or 'patch'")
       end
 
-      if options['no_merge'].present? && !%[true false].include?(options['no_merge'].to_s)
+      if options['no_merge'].present? && !%(true false).include?(options['no_merge'].to_s)
         errors.add(:base, "if provided, no_merge must be 'true' or 'false'")
       end
 
@@ -90,7 +90,7 @@ module Agents
 
     def handle(data, payload = {})
       url = interpolated(payload)[:post_url]
-      headers = headers()
+      headers = headers
 
       case method
       when 'get', 'delete'
@@ -109,9 +109,9 @@ module Agents
         error "Invalid method '#{method}'"
       end
 
-      faraday.run_request(method.to_sym, url, body, headers) { |request|
+      faraday.run_request(method.to_sym, url, body, headers) do |request|
         request.params.update(params) if params
-      }
+      end
     end
   end
 end

@@ -9,9 +9,7 @@ module InheritanceTracking
       super
     end
 
-    def subclasses
-      @subclasses
-    end
+    attr_reader :subclasses
 
     def with_subclasses(*subclasses)
       original_subclasses = @subclasses

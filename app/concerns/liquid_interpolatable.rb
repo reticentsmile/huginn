@@ -68,9 +68,9 @@ module LiquidInterpolatable
       when String
         interpolate_string(options)
       when ActiveSupport::HashWithIndifferentAccess, Hash
-        options.each_with_object(ActiveSupport::HashWithIndifferentAccess.new) { |(key, value), memo|
+        options.each_with_object(ActiveSupport::HashWithIndifferentAccess.new) do |(key, value), memo|
           memo[key] = interpolate_options(value)
-        }
+        end
       when Array
         options.map { |value| interpolate_options(value) }
       else
@@ -134,14 +134,14 @@ module LiquidInterpolatable
 
     # Escape a string for use in XPath expression
     def to_xpath(string)
-      subs = string.to_s.scan(/\G(?:\A\z|[^"]+|[^']+)/).map { |x|
+      subs = string.to_s.scan(/\G(?:\A\z|[^"]+|[^']+)/).map do |x|
         case x
         when /"/
-          %Q{'#{x}'}
+          %('#{x}')
         else
-          %Q{"#{x}"}
+          %("#{x}")
         end
-      }
+      end
       if subs.size == 1
         subs.first
       else
@@ -160,13 +160,13 @@ module LiquidInterpolatable
 
       def render(context)
         credential = context.registers[:agent].credential(@credential_name)
-        raise "No user credential named '#{@credential_name}' defined" if credential.nil?
+        fail "No user credential named '#{@credential_name}' defined" if credential.nil?
         credential
       end
     end
 
     class LineBreak < Liquid::Tag
-      def render(context)
+      def render(_context)
         "\n"
       end
     end

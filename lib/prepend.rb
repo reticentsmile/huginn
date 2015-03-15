@@ -41,8 +41,8 @@ class Module
 
     mod_id = (mod.name || 'Module__%d' % mod.object_id).gsub(/::/, '__')
 
-    mod.instance_methods.each { |name|
-      method_defined?(name) or next
+    mod.instance_methods.each do |name|
+      method_defined?(name) || next
 
       original = instance_method(name)
       next if original.owner != self
@@ -72,11 +72,11 @@ class Module
           end
         }
       end
-      module_eval {
+      module_eval do
         alias_method name_without, name
         remove_method name
-      }
-    }
+      end
+    end
 
     include stub
     include mod

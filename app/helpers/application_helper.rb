@@ -10,7 +10,7 @@ module ApplicationHelper
     when /\Afa-/
       "<i class='fa #{name}#{dom_class}'></i>".html_safe
     else
-      raise "Unrecognized icon name: #{name}"
+      fail "Unrecognized icon name: #{name}"
     end
   end
 
@@ -88,16 +88,16 @@ module ApplicationHelper
     @highlighted_ranges ||=
       case value = params[:hl].presence
       when String
-        value.split(/,/).flat_map { |part|
+        value.split(/,/).flat_map do |part|
           case part
           when /\A(\d+)\z/
             (part.to_i)..(part.to_i)
           when /\A(\d+)?-(\d+)?\z/
-            ($1 ? $1.to_i : 1)..($2 ? $2.to_i : Float::INFINITY)
+            (Regexp.last_match(1) ? Regexp.last_match(1).to_i : 1)..(Regexp.last_match(2) ? Regexp.last_match(2).to_i : Float::INFINITY)
           else
             []
           end
-        }
+        end
       else
         []
       end

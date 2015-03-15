@@ -35,7 +35,7 @@ shared_examples_for AgentControllerConcern do
       end
 
       it "should not reject 'enable' or 'disable' no matter if targets include an unschedulable agent" do
-        ['enable', 'disable'].each { |action|
+        %w(enable disable).each { |action|
           agent.options['action'] = action
           agent.control_targets = [agents(:bob_rain_notifier_agent)]
           expect(agent).to be_valid
@@ -57,7 +57,7 @@ shared_examples_for AgentControllerConcern do
     it "returns options['action']" do
       expect(agent.control_action).to eq('run')
 
-      ['run', 'enable', 'disable'].each { |action|
+      %w(run enable disable).each { |action|
         agent.options['action'] = action
         expect(agent.control_action).to eq(action)
       }

@@ -32,7 +32,7 @@ module Agents
         'channel' => '#general',
         'username' => DEFAULT_USERNAME,
         'message' => "Hey there, It's Huginn",
-        'icon' => '',
+        'icon' => ''
       }
     end
 

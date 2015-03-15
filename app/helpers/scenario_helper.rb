@@ -1,5 +1,4 @@
 module ScenarioHelper
-
   def style_colors(scenario)
     colors = {
       color: scenario.tag_fg_color || default_scenario_fg_color,
@@ -19,5 +18,4 @@ module ScenarioHelper
   def default_scenario_fg_color
     '#FFFFFF'
   end
-
 end

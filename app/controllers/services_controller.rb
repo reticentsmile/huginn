@@ -4,7 +4,7 @@ class ServicesController < ApplicationController
   before_action :upgrade_warning, only: :index
 
   def index
-    set_table_sort sorts: %w[provider name global], default: { provider: :asc }
+    set_table_sort sorts: %w(provider name global), default: { provider: :asc }
 
     @services = current_user.services.reorder(table_sort).page(params[:page])
 

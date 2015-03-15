@@ -21,31 +21,31 @@ module Agents
 
     def default_options
       {
-          'subject' => "You have some notifications!",
-          'headline' => "Your notifications:",
-          'expected_receive_period_in_days' => "2"
+        'subject' => "You have some notifications!",
+        'headline' => "Your notifications:",
+        'expected_receive_period_in_days' => "2"
       }
     end
 
     def receive(incoming_events)
       incoming_events.each do |event|
-        self.memory['queue'] ||= []
-        self.memory['queue'] << event.payload
-        self.memory['events'] ||= []
-        self.memory['events'] << event.id
+        memory['queue'] ||= []
+        memory['queue'] << event.payload
+        memory['events'] ||= []
+        memory['events'] << event.id
       end
     end
 
     def check
-      if self.memory['queue'] && self.memory['queue'].length > 0
-        ids = self.memory['events'].join(",")
-        groups = self.memory['queue'].map { |payload| present(payload) }
+      if memory['queue'] && memory['queue'].length > 0
+        ids = memory['events'].join(",")
+        groups = memory['queue'].map { |payload| present(payload) }
         log "Sending digest mail to #{user.email} with events [#{ids}]"
         recipients.each do |recipient|
-          SystemMailer.delay.send_message(:to => recipient, :subject => interpolated['subject'], :headline => interpolated['headline'], :groups => groups)
+          SystemMailer.delay.send_message(to: recipient, subject: interpolated['subject'], headline: interpolated['headline'], groups: groups)
         end
-        self.memory['queue'] = []
-        self.memory['events'] = []
+        memory['queue'] = []
+        memory['events'] = []
       end
     end
   end

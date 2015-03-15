@@ -61,15 +61,15 @@ module Agents
     end
 
     def slice_json(json, *keys)
-      keys.each_with_object({}){|key, hash| hash[key.to_s] = json[key.to_s]}
+      keys.each_with_object({}) { |key, hash| hash[key.to_s] = json[key.to_s] }
     end
 
     def previous_contents
-      self.memory['contents']
+      memory['contents']
     end
 
     def remember(contents)
-      self.memory['contents'] = contents
+      memory['contents'] = contents
     end
 
     # == Auxiliary classes ==
@@ -108,7 +108,5 @@ module Agents
         array.find { |entry| entry['path'] == path }
       end
     end
-
   end
-
 end

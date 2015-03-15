@@ -35,13 +35,13 @@ module Agents
           "item" => {
             "title" => "{{title}}",
             "description" => "Secret hovertext: {{hovertext}}",
-            "link" => "{{url}}",
+            "link" => "{{url}}"
           }
         }
       }
     end
 
-    #"guid" => "",
+    # "guid" => "",
     #  "pubDate" => ""
 
     def working?
@@ -82,7 +82,7 @@ module Agents
       interpolated['template']['description'].presence || "A feed of Events received by the '#{name}' Huginn Agent"
     end
 
-    def receive_web_request(params, method, format)
+    def receive_web_request(params, _method, format)
       if interpolated['secrets'].include?(params['secret'])
         items = received_events.order('id desc').limit(events_to_show).map do |event|
           interpolated = interpolate_options(options['template']['item'], event)
@@ -113,16 +113,16 @@ module Agents
             <?xml version="1.0" encoding="UTF-8" ?>
             <rss version="2.0">
             <channel>
-             <title>#{feed_title.encode(:xml => :text)}</title>
-             <description>#{feed_description.encode(:xml => :text)}</description>
-             <link>#{feed_link.encode(:xml => :text)}</link>
-             <lastBuildDate>#{Time.now.rfc2822.to_s.encode(:xml => :text)}</lastBuildDate>
-             <pubDate>#{Time.now.rfc2822.to_s.encode(:xml => :text)}</pubDate>
+             <title>#{feed_title.encode(xml: :text)}</title>
+             <description>#{feed_description.encode(xml: :text)}</description>
+             <link>#{feed_link.encode(xml: :text)}</link>
+             <lastBuildDate>#{Time.now.rfc2822.to_s.encode(xml: :text)}</lastBuildDate>
+             <pubDate>#{Time.now.rfc2822.to_s.encode(xml: :text)}</pubDate>
              <ttl>#{feed_ttl}</ttl>
 
           XML
 
-          content += items.to_xml(:skip_types => true, :root => "items", :skip_instruct => true, :indent => 1).gsub(/^<\/?items>/, '').strip
+          content += items.to_xml(skip_types: true, root: "items", skip_instruct: true, indent: 1).gsub(/^<\/?items>/, '').strip
 
           content += Utils.unindent(<<-XML)
             </channel>
@@ -133,7 +133,7 @@ module Agents
         end
       else
         if format =~ /json/
-          return [{ :error => "Not Authorized" }, 401]
+          return [{ error: "Not Authorized" }, 401]
         else
           return ["Not Authorized", 401]
         end

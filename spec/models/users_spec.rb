@@ -10,7 +10,7 @@ describe User do
       end
 
       it "can reject invalid invitation codes" do
-        %w['foo', 'bar'].each do |v|
+        %w('foo', 'bar').each do |v|
           is_expected.not_to allow_value(v).for(:invitation_code)
         end
       end

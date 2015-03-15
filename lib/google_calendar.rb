@@ -6,20 +6,18 @@ class GoogleCalendar
     @client.retries = 2
     @logger ||= logger
 
-    @calendar = @client.discovered_api('calendar','v3')
+    @calendar = @client.discovered_api('calendar', 'v3')
 
     @logger.info("Setup")
     @logger.debug @calendar.inspect
   end
 
   def auth_as
-    @client.authorization = Signet::OAuth2::Client.new({
-      token_credential_uri: 'https://accounts.google.com/o/oauth2/token',
-      audience:             'https://accounts.google.com/o/oauth2/token',
-      scope:                'https://www.googleapis.com/auth/calendar',
-      issuer:               @config['google']['service_account_email'],
-      signing_key:          @key
-    });
+    @client.authorization = Signet::OAuth2::Client.new(token_credential_uri: 'https://accounts.google.com/o/oauth2/token',
+                                                       audience:             'https://accounts.google.com/o/oauth2/token',
+                                                       scope:                'https://www.googleapis.com/auth/calendar',
+                                                       issuer:               @config['google']['service_account_email'],
+                                                       signing_key:          @key)
 
     @client.authorization.fetch_access_token!
   end
@@ -47,7 +45,7 @@ class GoogleCalendar
 
     date ||= Date.today
 
-    @logger.info("Attempting to receive events for "+who)
+    @logger.info("Attempting to receive events for " + who)
     @logger.debug details.to_yaml
 
     ret = @client.execute(
@@ -58,6 +56,6 @@ class GoogleCalendar
     )
 
     @logger.debug ret.to_yaml
-    ret    
+    ret
   end
 end

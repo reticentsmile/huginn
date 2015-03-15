@@ -21,7 +21,7 @@ module SetupTools
       config_data.split("\n").map do |line|
         next if line =~ /^\s*(#|$)/ # skip comments and empty lines
         first_equal_sign = line.index('=')
-        raise "Invalid line found in config: #{line}" unless first_equal_sign
+        fail "Invalid line found in config: #{line}" unless first_equal_sign
         $config[line.slice(0, first_equal_sign)] = line.slice(first_equal_sign + 1, line.length)
       end
     end

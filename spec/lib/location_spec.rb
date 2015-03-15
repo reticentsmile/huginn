@@ -64,10 +64,10 @@ describe Location do
       '{{location.latitude}}' => '2.0',
       '{{location.lng}}' => '3.0',
       '{{location.longitude}}' => '3.0',
-      '{{location.latlng}}' => '2.0,3.0',
+      '{{location.latlng}}' => '2.0,3.0'
     }.each { |template, result|
       expect(Liquid::Template.parse(template).render('location' => location.to_liquid)).to eq(result),
-        "expected #{template.inspect} to expand to #{result.inspect}"
+                                                                                           "expected #{template.inspect} to expand to #{result.inspect}"
     }
   end
 end

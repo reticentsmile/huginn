@@ -7,7 +7,7 @@ module RDBMSFunctions
       when :postgresql
         "(#{source} + INTERVAL '#{amount} #{unit}')"
       else
-        raise NotImplementedError, "Unknown adapter type '#{adapter_type}'"
+        fail NotImplementedError, "Unknown adapter type '#{adapter_type}'"
     end
   end
 end

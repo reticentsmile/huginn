@@ -9,9 +9,9 @@ module Agents
 
     API_BASE = 'https://api.pushbullet.com/v2/'
     TYPE_TO_ATTRIBUTES = {
-            'note'    => [:title, :body],
-            'link'    => [:title, :body, :url],
-            'address' => [:name, :address]
+      'note'    => [:title, :body],
+      'link'    => [:title, :body, :url],
+      'address' => [:name, :address]
     }
     class Unauthorized < StandardError; end
 
@@ -41,13 +41,13 @@ module Agents
         'device_id' => '',
         'title' => "{{title}}",
         'body' => '{{body}}',
-        'type' => 'note',
+        'type' => 'note'
       }
     end
 
     form_configurable :api_key, roles: :validatable
     form_configurable :device_id, roles: :completable
-    form_configurable :type, type: :array, values: ['note', 'link', 'address']
+    form_configurable :type, type: :array, values: %w(note link address)
     form_configurable :title
     form_configurable :body, type: :text
     form_configurable :url
@@ -57,9 +57,9 @@ module Agents
     def validate_options
       errors.add(:base, "you need to specify a pushbullet api_key") if options['api_key'].blank?
       errors.add(:base, "you need to specify a device_id") if options['device_id'].blank?
-      errors.add(:base, "you need to specify a valid message type") if options['type'].blank? or not ['note', 'link', 'address'].include?(options['type'])
+      errors.add(:base, "you need to specify a valid message type") if options['type'].blank? || !%w(note link address).include?(options['type'])
       TYPE_TO_ATTRIBUTES[options['type']].each do |attr|
-        errors.add(:base, "you need to specify '#{attr.to_s}' for the type '#{options['type']}'") if options[attr].blank?
+        errors.add(:base, "you need to specify '#{attr}' for the type '#{options['type']}'") if options[attr].blank?
       end
     end
 
@@ -95,7 +95,7 @@ module Agents
 
     def request(http_method, method, options)
       response = JSON.parse(HTTParty.send(http_method, API_BASE + method, options).body)
-      raise Unauthorized, response['error']['message'] if response['error'].present?
+      fail Unauthorized, response['error']['message'] if response['error'].present?
       response
     end
 
@@ -110,10 +110,9 @@ module Agents
       return if options['device_id'].present?
       safely do
         response = request(:post, 'devices', basic_auth.merge(body: {nickname: 'Huginn', type: 'stream'}))
-        self.options[:device_id] = response['iden']
+        options[:device_id] = response['iden']
       end
     end
-
 
     def basic_auth
       {basic_auth: {username: interpolated[:api_key].presence || credential('pushbullet_api_key'), password: ''}}

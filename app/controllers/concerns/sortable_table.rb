@@ -10,12 +10,12 @@ module SortableTable
   protected
 
   def table_sort
-    raise("You must call set_table_sort in any action using table_sort.") unless @table_sort_info.present?
+    fail("You must call set_table_sort in any action using table_sort.") unless @table_sort_info.present?
     @table_sort_info[:order]
   end
 
   def set_table_sort(sort_options)
-    valid_sorts = sort_options[:sorts] or raise ArgumentError.new("You must specify :sorts as an array of valid sort attributes.")
+    valid_sorts = sort_options[:sorts] or fail ArgumentError.new("You must specify :sorts as an array of valid sort attributes.")
     default = sort_options[:default] || { valid_sorts.first.to_sym => :desc }
 
     if params[:sort].present?

@@ -89,9 +89,9 @@ module Agents
 
     event_description do
       "Events will have the following fields:\n\n    %s" % [
-        Utils.pretty_print(Hash[options['extract'].keys.map { |key|
+        Utils.pretty_print(Hash[options['extract'].keys.map do |key|
           [key, "..."]
-        }])
+        end])
       ]
     end
 
@@ -101,15 +101,15 @@ module Agents
 
     def default_options
       {
-          'expected_update_period_in_days' => "2",
-          'url' => "http://xkcd.com",
-          'type' => "html",
-          'mode' => "on_change",
-          'extract' => {
-            'url' => { 'css' => "#comic img", 'value' => "@src" },
-            'title' => { 'css' => "#comic img", 'value' => "@alt" },
-            'hovertext' => { 'css' => "#comic img", 'value' => "@title" }
-          }
+        'expected_update_period_in_days' => "2",
+        'url' => "http://xkcd.com",
+        'type' => "html",
+        'mode' => "on_change",
+        'extract' => {
+          'url' => { 'css' => "#comic img", 'value' => "@src" },
+          'title' => { 'css' => "#comic img", 'value' => "@alt" },
+          'hovertext' => { 'css' => "#comic img", 'value' => "@title" }
+        }
       }
     end
 
@@ -122,7 +122,7 @@ module Agents
 
       # Check for optional fields
       if options['mode'].present?
-        errors.add(:base, "mode must be set to on_change, all or merge") unless %w[on_change all merge].include?(options['mode'])
+        errors.add(:base, "mode must be set to on_change, all or merge") unless %w(on_change all merge).include?(options['mode'])
       end
 
       if options['expected_update_period_in_days'].present?
@@ -164,9 +164,9 @@ module Agents
     def check_url(url, payload = {})
       log "Fetching #{url}"
       response = faraday.get(url)
-      raise "Failed: #{response.inspect}" unless response.success?
+      fail "Failed: #{response.inspect}" unless response.success?
 
-      interpolation_context.stack {
+      interpolation_context.stack do
         interpolation_context['_response_'] = ResponseDrop.new(response)
         body = response.body
         if (encoding = interpolated['force_encoding']).present?
@@ -195,7 +195,7 @@ module Agents
         num_unique_lengths = interpolated['extract'].keys.map { |name| output[name].length }.uniq
 
         if num_unique_lengths.length != 1
-          raise "Got an uneven number of matches for #{interpolated['name']}: #{interpolated['extract'].inspect}"
+          fail "Got an uneven number of matches for #{interpolated['name']}: #{interpolated['extract'].inspect}"
         end
 
         old_events = previous_payloads num_unique_lengths.first
@@ -213,7 +213,7 @@ module Agents
             create_event payload: payload.merge(result)
           end
         end
-      }
+      end
     rescue => e
       error "Error when fetching url: #{e.message}\n#{e.backtrace.join("\n")}"
     end
@@ -249,7 +249,7 @@ module Agents
       when 'all', 'merge', ''
         true
       else
-        raise "Illegal options[mode]: #{interpolated['mode']}"
+        fail "Illegal options[mode]: #{interpolated['mode']}"
       end
     end
 
@@ -285,34 +285,34 @@ module Agents
       end).to_s
     end
 
-    def extract_each(doc, &block)
-      interpolated['extract'].each_with_object({}) { |(name, extraction_details), output|
+    def extract_each(_doc, &block)
+      interpolated['extract'].each_with_object({}) do |(name, extraction_details), output|
         output[name] = block.call(extraction_details)
-      }
+      end
     end
 
     def extract_json(doc)
-      extract_each(doc) { |extraction_details|
+      extract_each(doc) do |extraction_details|
         result = Utils.values_at(doc, extraction_details['path'])
         log "Extracting #{extraction_type} at #{extraction_details['path']}: #{result}"
         result
-      }
+      end
     end
 
     def extract_text(doc)
-      extract_each(doc) { |extraction_details|
+      extract_each(doc) do |extraction_details|
         regexp = Regexp.new(extraction_details['regexp'])
         result = []
-        doc.scan(regexp) {
+        doc.scan(regexp) do
           result << Regexp.last_match[extraction_details['index']]
-        }
+        end
         log "Extracting #{extraction_type} at #{regexp}: #{result}"
         result
-      }
+      end
     end
 
     def extract_xml(doc)
-      extract_each(doc) { |extraction_details|
+      extract_each(doc) do |extraction_details|
         case
         when css = extraction_details['css']
           nodes = doc.css(css)
@@ -320,11 +320,11 @@ module Agents
           doc.remove_namespaces! # ignore xmlns, useful when parsing atom feeds
           nodes = doc.xpath(xpath)
         else
-          raise '"css" or "xpath" is required for HTML or XML extraction'
+          fail '"css" or "xpath" is required for HTML or XML extraction'
         end
         case nodes
         when Nokogiri::XML::NodeSet
-          result = nodes.map { |node|
+          result = nodes.map do |node|
             case value = node.xpath(extraction_details['value'])
             when Float
               # Node#xpath() returns any numeric value as float;
@@ -332,13 +332,13 @@ module Agents
               value = value.to_i if value.to_i == value
             end
             value.to_s
-          }
+          end
         else
-          raise "The result of HTML/XML extraction was not a NodeSet"
+          fail "The result of HTML/XML extraction was not a NodeSet"
         end
         log "Extracting #{extraction_type} at #{xpath || css}: #{result}"
         result
-      }
+      end
     end
 
     def parse(data)
@@ -352,7 +352,7 @@ module Agents
       when "text"
         data
       else
-        raise "Unknown extraction type #{extraction_type}"
+        fail "Unknown extraction type #{extraction_type}"
       end
     end
 

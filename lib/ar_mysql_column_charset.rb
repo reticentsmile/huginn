@@ -47,31 +47,31 @@ module ActiveRecord::ConnectionAdapters
       end
 
       def charset_collation(charset, collation)
-        [charset, collation].map { |name|
+        [charset, collation].map do |name|
           case name
           when nil
             nil
           when /\A(utf8mb4(_\w*)?)\z/
             if utf8mb4_supported?
-              $1
+              Regexp.last_match(1)
             else
-              "utf8#{$2}"
+              "utf8#{Regexp.last_match(2)}"
             end
           else
             name.to_s
           end
-        }
+        end
       end
 
       def create_database(name, options = {})
         # utf8mb4 is used in column definitions; use utf8 for
         # databases.
-        [:charset, :collation].each { |key|
+        [:charset, :collation].each do |key|
           case options[key]
           when /\A(utf8mb4(_\w*)?)\z/
-            options = options.merge(key => "utf8#{$2}")
+            options = options.merge(key => "utf8#{Regexp.last_match(2)}")
           end
-        }
+        end
         super(name, options)
       end
     end

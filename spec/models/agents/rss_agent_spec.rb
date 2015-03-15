@@ -4,15 +4,15 @@ describe Agents::RssAgent do
   before do
     @valid_options = {
       'expected_update_period_in_days' => "2",
-      'url' => "https://github.com/cantino/huginn/commits/master.atom",
+      'url' => "https://github.com/cantino/huginn/commits/master.atom"
     }
 
-    stub_request(:any, /github.com/).to_return(:body => File.read(Rails.root.join("spec/data_fixtures/github_rss.atom")), :status => 200)
-    stub_request(:any, /SlickdealsnetFP/).to_return(:body => File.read(Rails.root.join("spec/data_fixtures/slickdeals.atom")), :status => 200)
+    stub_request(:any, /github.com/).to_return(body: File.read(Rails.root.join("spec/data_fixtures/github_rss.atom")), status: 200)
+    stub_request(:any, /SlickdealsnetFP/).to_return(body: File.read(Rails.root.join("spec/data_fixtures/slickdeals.atom")), status: 200)
   end
 
   let(:agent) do
-    _agent = Agents::RssAgent.new(:name => "rss feed", :options => @valid_options)
+    _agent = Agents::RssAgent.new(name: "rss feed", options: @valid_options)
     _agent.user = users(:bob)
     _agent.save!
     _agent
@@ -63,7 +63,7 @@ describe Agents::RssAgent do
 
     it "should track ids and not re-emit the same item when seen again" do
       agent.check
-      expect(agent.memory['seen_ids']).to eq(agent.events.map {|e| e.payload['id'] })
+      expect(agent.memory['seen_ids']).to eq(agent.events.map { |e| e.payload['id'] })
 
       newest_id = agent.memory['seen_ids'][0]
       expect(agent.events.first.payload['id']).to eq(newest_id)
@@ -93,7 +93,7 @@ describe Agents::RssAgent do
       expect {
         agent.check
       }.to change { agent.events.count }.by(79)
-      expect(agent.memory['seen_ids']).to eq(agent.events.map {|e| Digest::MD5.hexdigest(e.payload['content']) })
+      expect(agent.memory['seen_ids']).to eq(agent.events.map { |e| Digest::MD5.hexdigest(e.payload['content']) })
     end
   end
 end

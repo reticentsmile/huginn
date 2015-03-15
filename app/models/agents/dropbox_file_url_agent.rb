@@ -43,8 +43,8 @@ module Agents
     end
 
     def receive(events)
-      events.map { |e| e.payload['paths'].split(',').map(&:strip) }
-        .flatten.each { |path| create_event payload: url_for(path) }
+      events.map { |e| e.payload['paths'].split(',').map(&:strip) }.
+        flatten.each { |path| create_event payload: url_for(path) }
     end
 
     private
@@ -52,7 +52,5 @@ module Agents
     def url_for(path)
       dropbox.find(path).direct_url
     end
-
   end
-
 end

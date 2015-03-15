@@ -3,7 +3,7 @@ class ScenariosController < ApplicationController
   skip_before_action :authenticate_user!, only: :export
 
   def index
-    set_table_sort sorts: %w[name public], default: { name: :asc }
+    set_table_sort sorts: %w(name public), default: { name: :asc }
 
     @scenarios = current_user.scenarios.reorder(table_sort).page(params[:page])
 
@@ -25,7 +25,7 @@ class ScenariosController < ApplicationController
   def show
     @scenario = current_user.scenarios.find(params[:id])
 
-    set_table_sort sorts: %w[name last_check_at last_event_at last_receive_at], default: { name: :asc }
+    set_table_sort sorts: %w(name last_check_at last_event_at last_receive_at), default: { name: :asc }
     @agents = @scenario.agents.preload(:scenarios, :controllers).reorder(table_sort).page(params[:page])
 
     respond_to do |format|
@@ -45,17 +45,17 @@ class ScenariosController < ApplicationController
 
   def export
     @scenario = Scenario.find(params[:id])
-    raise ActiveRecord::RecordNotFound unless @scenario.public? || (current_user && current_user.id == @scenario.user_id)
+    fail ActiveRecord::RecordNotFound unless @scenario.public? || (current_user && current_user.id == @scenario.user_id)
 
-    @exporter = AgentsExporter.new(:name => @scenario.name,
-                                   :description => @scenario.description,
-                                   :guid => @scenario.guid,
-                                   :tag_fg_color => @scenario.tag_fg_color,
-                                   :tag_bg_color => @scenario.tag_bg_color,
-                                   :source_url => @scenario.public? && export_scenario_url(@scenario),
-                                   :agents => @scenario.agents)
+    @exporter = AgentsExporter.new(name: @scenario.name,
+                                   description: @scenario.description,
+                                   guid: @scenario.guid,
+                                   tag_fg_color: @scenario.tag_fg_color,
+                                   tag_bg_color: @scenario.tag_bg_color,
+                                   source_url: @scenario.public? && export_scenario_url(@scenario),
+                                   agents: @scenario.agents)
     response.headers['Content-Disposition'] = 'attachment; filename="' + @exporter.filename + '"'
-    render :json => JSON.pretty_generate(@exporter.as_json)
+    render json: JSON.pretty_generate(@exporter.as_json)
   end
 
   def edit

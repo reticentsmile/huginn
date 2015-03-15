@@ -134,7 +134,7 @@ module Agents
       options['hit'] ||= {}
       options['hit']['questions'] ||= []
 
-      errors.add(:base, "'trigger_on' must be one of 'schedule' or 'event'") unless %w[schedule event].include?(options['trigger_on'])
+      errors.add(:base, "'trigger_on' must be one of 'schedule' or 'event'") unless %w(schedule event).include?(options['trigger_on'])
       errors.add(:base, "'hit.assignments' should specify the number of HIT assignments to create") unless options['hit']['assignments'].present? && options['hit']['assignments'].to_i > 0
       errors.add(:base, "'hit.title' must be provided") unless options['hit']['title'].present?
       errors.add(:base, "'hit.description' must be provided") unless options['hit']['description'].present?
@@ -146,11 +146,11 @@ module Agents
         errors.add(:base, "'submission_period' must be set to a positive number of hours when 'trigger_on' is set to 'schedule'") unless options['submission_period'].present? && options['submission_period'].to_i > 0
       end
 
-      if options['hit']['questions'].any? { |question| %w[key name required type question].any? {|k| !question[k].present? } }
+      if options['hit']['questions'].any? { |question| %w(key name required type question).any? { |k| !question[k].present? } }
         errors.add(:base, "all questions must set 'key', 'name', 'required', 'type', and 'question'")
       end
 
-      if options['hit']['questions'].any? { |question| question['type'] == "selection" && (!question['selections'].present? || question['selections'].length == 0 || !question['selections'].all? {|s| s['key'].present? } || !question['selections'].all? { |s| s['text'].present? })}
+      if options['hit']['questions'].any? { |question| question['type'] == "selection" && (!question['selections'].present? || question['selections'].length == 0 || !question['selections'].all? { |s| s['key'].present? } || !question['selections'].all? { |s| s['text'].present? }) }
         errors.add(:base, "all questions of type 'selection' must have a selections array with selections that set 'key' and 'name'")
       end
 
@@ -281,7 +281,7 @@ module Agents
                 end
               end
 
-              top_answer = scores.to_a.sort {|b, a| a.last <=> b.last }.first.first
+              top_answer = scores.to_a.sort { |b, a| a.last <=> b.last }.first.first
 
               payload = {
                 'answers' => memory['hits'][hit_id]['answers'],
@@ -289,8 +289,8 @@ module Agents
                 'best_answer' => memory['hits'][hit_id]['answers'][top_answer.to_i - 1]
               }
 
-              event = create_event :payload => payload
-              log "Event emitted with answer(s) for poll", :outbound_event => event, :inbound_event => inbound_event
+              event = create_event payload: payload
+              log "Event emitted with answer(s) for poll", outbound_event: event, inbound_event: inbound_event
             else
               # handle normal completed HITs
               payload = { 'answers' => assignments.map(&:answers) }
@@ -309,7 +309,7 @@ module Agents
                 payload['counts'] = counts
 
                 majority_answer = counts.inject({}) do |memo, (key, question_counts)|
-                  memo[key] = question_counts.to_a.sort {|a, b| a.last <=> b.last }.last.first
+                  memo[key] = question_counts.to_a.sort { |a, b| a.last <=> b.last }.last.first
                   memo
                 end
                 payload['majority_answer'] = majority_answer
@@ -330,7 +330,7 @@ module Agents
 
               if create_poll?
                 questions = []
-                selections = 5.times.map { |i| { 'key' => i+1, 'text' => i+1 } }.reverse
+                selections = 5.times.map { |i| { 'key' => i + 1, 'text' => i + 1 } }.reverse
                 assignments.length.times do |index|
                   questions << {
                     'type' => "selection",
@@ -354,19 +354,19 @@ module Agents
                                                       'answers' => assignments.map(&:answers),
                                                       'event_id' => inbound_event && inbound_event.id }
 
-                log "Poll HIT created with ID #{poll_hit.id} and URL #{poll_hit.url}.  Original HIT: #{hit_id}", :inbound_event => inbound_event
+                log "Poll HIT created with ID #{poll_hit.id} and URL #{poll_hit.url}.  Original HIT: #{hit_id}", inbound_event: inbound_event
               else
                 if options[:separate_answers]
                   payload['answers'].each.with_index do |answer, index|
                     sub_payload = payload.dup
                     sub_payload.delete('answers')
                     sub_payload['answer'] = answer
-                    event = create_event :payload => sub_payload
-                    log "Event emitted with answer ##{index}", :outbound_event => event, :inbound_event => inbound_event
+                    event = create_event payload: sub_payload
+                    log "Event emitted with answer ##{index}", outbound_event: event, inbound_event: inbound_event
                   end
                 else
-                  event = create_event :payload => payload
-                  log "Event emitted with answer(s)", :outbound_event => event, :inbound_event => inbound_event
+                  event = create_event payload: payload
+                  log "Event emitted with answer(s)", outbound_event: event, inbound_event: inbound_event
                 end
               end
             end
@@ -397,7 +397,7 @@ module Agents
                          'payload' => event && event.payload,
                          'metadata' => { 'event_id' => event && event.id }
 
-        log "HIT created with ID #{hit.id} and URL #{hit.url}", :inbound_event => event
+        log "HIT created with ID #{hit.id} and URL #{hit.url}", inbound_event: event
       end
 
       def create_hit(opts = {})
@@ -405,13 +405,13 @@ module Agents
         title = interpolate_string(opts['title'], payload).strip
         description = interpolate_string(opts['description'], payload).strip
         questions = interpolate_options(opts['questions'], payload)
-        hit = RTurk::Hit.create(:title => title) do |hit|
+        hit = RTurk::Hit.create(title: title) do |hit|
           hit.max_assignments = (opts['assignments'] || 1).to_i
           hit.description = description
           hit.lifetime = (opts['lifetime_in_seconds'] || 24 * 60 * 60).to_i
-          hit.question_form AgentQuestionForm.new(:title => title, :description => description, :questions => questions)
+          hit.question_form AgentQuestionForm.new(title: title, description: description, questions: questions)
           hit.reward = (opts['reward'] || 0.05).to_f
-          #hit.qualifications.add :approval_rate, { :gt => 80 }
+          # hit.qualifications.add :approval_rate, { :gt => 80 }
         end
         memory['hits'] ||= {}
         memory['hits'][hit.id] = opts['metadata'] || {}

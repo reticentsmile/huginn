@@ -1,4 +1,4 @@
-# encoding: utf-8 
+# encoding: utf-8
 
 module Agents
   class WeiboPublishAgent < Agent
@@ -53,14 +53,14 @@ module Agents
         end
         begin
           publish_tweet tweet_text
-          create_event :payload => {
+          create_event payload: {
             'success' => true,
             'published_tweet' => tweet_text,
             'agent_id' => event.agent_id,
             'event_id' => event.id
           }
         rescue OAuth2::Error => e
-          create_event :payload => {
+          create_event payload: {
             'success' => false,
             'error' => e.message,
             'failed_tweet' => tweet_text,
@@ -71,11 +71,11 @@ module Agents
       end
     end
 
-    def publish_tweet text
+    def publish_tweet(text)
       weibo_client.statuses.update text
     end
 
-    def unwrap_tco_urls text, tweet_json
+    def unwrap_tco_urls(text, tweet_json)
       tweet_json[:entities][:urls].each do |url|
         text.gsub! url[:url], url[:expanded_url]
       end

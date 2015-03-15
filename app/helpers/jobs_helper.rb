@@ -1,5 +1,4 @@
 module JobsHelper
-
   def status(job)
     case
     when job.failed_at

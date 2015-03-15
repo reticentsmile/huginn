@@ -80,7 +80,7 @@ module Agents
 
           post_params['priority'] = (event.payload['priority'].presence || payload_interpolated['priority']).to_i
 
-          if event.payload.has_key? 'timestamp'
+          if event.payload.key? 'timestamp'
             post_params['timestamp'] = (event.payload['timestamp']).to_s
           end
 
@@ -100,7 +100,7 @@ module Agents
     end
 
     def send_notification(post_params)
-      response = HTTParty.post(API_URL, :query => post_params)
+      response = HTTParty.post(API_URL, query: post_params)
       puts response
     end
   end

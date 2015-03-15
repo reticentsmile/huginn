@@ -12,7 +12,7 @@ module Agents
       The Jira Agent subscribes to Jira issue updates.
 
       `jira_url` specifies the full URL of the jira installation, including https://
-      `jql` is an optional Jira Query Language-based filter to limit the flow of events. See [JQL Docs](https://confluence.atlassian.com/display/JIRA/Advanced+Searching) for details. 
+      `jql` is an optional Jira Query Language-based filter to limit the flow of events. See [JQL Docs](https://confluence.atlassian.com/display/JIRA/Advanced+Searching) for details.
       `username` and `password` are optional, and may need to be specified if your Jira instance is read-protected
       `timeout` is an optional parameter that specifies how long the request processing may take in minutes.
 
@@ -49,7 +49,7 @@ module Agents
     end
 
     def validate_options
-      errors.add(:base, "you need to specify password if user name is set") if options['username'].present? and not options['password'].present?
+      errors.add(:base, "you need to specify password if user name is set") if options['username'].present? && !options['password'].present?
       errors.add(:base, "you need to specify your jira URL") unless options['jira_url'].present?
       errors.add(:base, "you need to specify the expected update period") unless options['expected_update_period_in_days'].present?
       errors.add(:base, "you need to specify request timeout") unless options['timeout'].present?
@@ -71,41 +71,41 @@ module Agents
 
         # this check is more precise than in get_issues()
         # see get_issues() for explanation
-        if not last_run or updated > last_run
-          create_event :payload => issue
+        if !last_run || updated > last_run
+          create_event payload: issue
         end
       end
 
       memory[:last_run] = current_run
     end
 
-  private
+    private
     def request_url(jql, start_at)
-      "#{interpolated[:jira_url]}/rest/api/2/search?jql=#{CGI::escape(jql)}&fields=*all&startAt=#{start_at}"
+      "#{interpolated[:jira_url]}/rest/api/2/search?jql=#{CGI.escape(jql)}&fields=*all&startAt=#{start_at}"
     end
 
     def request_options
-      ropts = {:headers => {"User-Agent" => "Huginn (https://github.com/cantino/huginn)"}}
+      ropts = {headers: {"User-Agent" => "Huginn (https://github.com/cantino/huginn)"}}
 
-      if !interpolated[:username].empty?
-        ropts = ropts.merge({:basic_auth => {:username =>interpolated[:username], :password=>interpolated[:password]}})
+      unless interpolated[:username].empty?
+        ropts = ropts.merge(basic_auth: {username: interpolated[:username], password: interpolated[:password]})
       end
 
       ropts
     end
 
     def get(url, options)
-        response = HTTParty.get(url, options)
+      response = HTTParty.get(url, options)
 
-        if response.code == 400
-          raise RuntimeError.new("Jira error: #{response['errorMessages']}") 
-        elsif response.code == 403
-          raise RuntimeError.new("Authentication failed: Forbidden (403)")
-        elsif response.code != 200
-          raise RuntimeError.new("Request failed: #{response}")
-        end
+      if response.code == 400
+        fail RuntimeError.new("Jira error: #{response['errorMessages']}")
+      elsif response.code == 403
+        fail RuntimeError.new("Authentication failed: Forbidden (403)")
+      elsif response.code != 200
+        fail RuntimeError.new("Request failed: #{response}")
+      end
 
-        response
+      response
     end
 
     def get_issues(since)
@@ -117,14 +117,14 @@ module Agents
       # earlier and filter out unnecessary ones at a later
       # stage. Fortunately, the 'updated' field has GMT
       # offset
-      since -= 24*60*60 if since
+      since -= 24 * 60 * 60 if since
 
       jql = ""
 
       if !interpolated[:jql].empty? && since
         jql = "(#{interpolated[:jql]}) and updated >= '#{since.strftime('%Y-%m-%d %H:%M')}'"
       else
-        jql = interpolated[:jql] if !interpolated[:jql].empty?
+        jql = interpolated[:jql] unless interpolated[:jql].empty?
         jql = "updated >= '#{since.strftime('%Y-%m-%d %H:%M')}'" if since
       end
 
@@ -135,26 +135,24 @@ module Agents
         response = get(request_url(jql, startAt), request_options)
 
         if response['issues'].length == 0
-          request_limit+=1
+          request_limit += 1
         end
 
         if request_limit > MAX_EMPTY_REQUESTS
-          raise RuntimeError.new("There is no progress while fetching issues")
+          fail RuntimeError.new("There is no progress while fetching issues")
         end
 
         if Time.now > start_time + interpolated['timeout'].to_i * 60
-          raise RuntimeError.new("Timeout exceeded while fetching issues")
+          fail RuntimeError.new("Timeout exceeded while fetching issues")
         end
 
         issues += response['issues']
         startAt += response['issues'].length
- 
+
         break if startAt >= response['total']
       end
 
       issues
     end
-
   end
 end
-

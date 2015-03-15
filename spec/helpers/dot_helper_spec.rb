@@ -6,7 +6,7 @@ describe DotHelper do
       default_schedule "2pm"
 
       def check
-        create_event :payload => {}
+        create_event payload: {}
       end
     end
 
@@ -14,7 +14,7 @@ describe DotHelper do
       cannot_be_scheduled!
 
       def check
-        create_event :payload => {}
+        create_event payload: {}
       end
     end
 
@@ -49,7 +49,7 @@ describe DotHelper do
             agent.user = users(:bob)
             agent.sources << @bar2
             agent.save!
-          },
+          }
         ]
       end
 

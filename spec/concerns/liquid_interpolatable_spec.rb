@@ -23,7 +23,7 @@ describe LiquidInterpolatable::Filters do
       include LiquidInterpolatable
 
       def check
-        create_event :payload => {}
+        create_event payload: {}
       end
 
       def validate_options
@@ -47,8 +47,8 @@ describe LiquidInterpolatable::Filters do
 
     it 'should escape a string for use in XPath expression' do
       [
-        %q{abc}.freeze,
-        %q{'a"bc'dfa""fds''fa}.freeze,
+        'abc'.freeze,
+        %q('a"bc'dfa""fds''fa).freeze
       ].each { |string|
         expect(@filter.to_xpath_roundtrip(string)).to eq(string)
       }

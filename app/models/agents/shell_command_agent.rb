@@ -33,15 +33,15 @@ module Agents
         'path' => '/home/Huginn',
         'exit_status' => '0',
         'errors' => '',
-        'output' => '/home/Huginn' 
+        'output' => '/home/Huginn'
       }
     MD
 
     def default_options
       {
-          'path' => "/",
-          'command' => "pwd",
-          'expected_update_period_in_days' => 1
+        'path' => "/",
+        'command' => "pwd",
+        'expected_update_period_in_days' => 1
       }
     end
 
@@ -79,9 +79,9 @@ module Agents
         result, errors, exit_status = run_command(path, command)
 
         vals = {"command" => command, "path" => path, "exit_status" => exit_status, "errors" => errors, "output" => result}
-        created_event = create_event :payload => vals
+        created_event = create_event payload: vals
 
-        log("Ran '#{command}' under '#{path}'", :outbound_event => created_event, :inbound_event => event)
+        log("Ran '#{command}' under '#{path}'", outbound_event: created_event, inbound_event: event)
       else
         log("Unable to run because insecure agents are not enabled.  Edit ENABLE_INSECURE_AGENTS in the Huginn .env configuration.")
       end
@@ -92,7 +92,7 @@ module Agents
       errors = nil
       exit_status = nil
 
-      Dir.chdir(path){
+      Dir.chdir(path)do
         begin
           stdin, stdout, stderr, wait_thr = Open3.popen3(command)
           exit_status = wait_thr.value.to_i
@@ -101,7 +101,7 @@ module Agents
         rescue Exception => e
           errors = e.to_s
         end
-      }
+      end
 
       result = result.to_s.strip
       errors = errors.to_s.strip

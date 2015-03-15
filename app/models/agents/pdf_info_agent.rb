@@ -3,7 +3,6 @@ require 'hypdf'
 
 module Agents
   class PdfInfoAgent < Agent
-
     gem_dependency_check { defined?(HyPDF) }
 
     cannot_be_scheduled!
@@ -19,7 +18,7 @@ module Agents
     event_description <<-MD
     This will change based on the metadata in the pdf.
 
-      { "Title"=>"Everyday Rails Testing with RSpec", 
+      { "Title"=>"Everyday Rails Testing with RSpec",
         "Author"=>"Aaron Sumner",
         "Creator"=>"LaTeX with hyperref package",
         "Producer"=>"xdvipdfmx (0.7.8)",
@@ -57,9 +56,8 @@ module Agents
       Array(in_url).each do |url|
         log "Fetching #{url}"
         info = HyPDF.pdfinfo(open(url))
-        create_event :payload => info.merge(payload)
+        create_event payload: info.merge(payload)
       end
     end
-
   end
 end

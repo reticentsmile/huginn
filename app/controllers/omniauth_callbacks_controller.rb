@@ -9,7 +9,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
         redirect_to services_path, error: "Error creating the service."
       end
     else
-      raise ActionController::RoutingError, 'not found'
+      fail ActionController::RoutingError, 'not found'
     end
   end
 end

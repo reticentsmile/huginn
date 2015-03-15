@@ -43,8 +43,8 @@ module Agents
     form_configurable :username
     form_configurable :message, type: :text
     form_configurable :notify, type: :boolean
-    form_configurable :color, type: :array, values: ['yellow', 'red', 'green', 'purple', 'gray', 'random']
-    form_configurable :format, type: :array, values: ['html', 'text']
+    form_configurable :color, type: :array, values: %w(yellow red green purple gray random)
+    form_configurable :format, type: :array, values: %w(html text)
 
     def validate_auth_token
       client.rooms
@@ -70,9 +70,9 @@ module Agents
       incoming_events.each do |event|
         mo = interpolated(event)
         client[mo[:room_name]].send(mo[:username][0..14], mo[:message],
-                                      notify: boolify(mo[:notify]),
-                                      color: mo[:color],
-                                      message_format: mo[:format].presence || 'html'
+                                    notify: boolify(mo[:notify]),
+                                    color: mo[:color],
+                                    message_format: mo[:format].presence || 'html'
                                     )
       end
     end

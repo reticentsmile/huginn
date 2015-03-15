@@ -44,7 +44,7 @@ describe Agents::PostAgent do
         when 'application/json'
           req.data = ActiveSupport::JSON.decode(request.body)
         else
-          raise "unexpected Content-Type: #{content_type}"
+          fail "unexpected Content-Type: #{content_type}"
         end
       end
       { status: 200, body: "ok" }
@@ -55,7 +55,7 @@ describe Agents::PostAgent do
 
   describe "making requests" do
     it "can make requests of each type" do
-      %w[get put post patch delete].each.with_index(1) do |verb, index|
+      %w(get put post patch delete).each.with_index(1) do |verb, index|
         @checker.options['method'] = verb
         expect(@checker).to be_valid
         @checker.check
@@ -239,7 +239,7 @@ describe Agents::PostAgent do
       @checker.options['payload'] = "hello"
       expect(@checker).not_to be_valid
 
-      @checker.options['payload'] = ["foo", "bar"]
+      @checker.options['payload'] = %w(foo bar)
       expect(@checker).not_to be_valid
 
       @checker.options['payload'] = { 'this' => 'that' }
@@ -247,7 +247,7 @@ describe Agents::PostAgent do
     end
 
     it "requires headers to be a hash, if present" do
-      @checker.options['headers'] = [1,2,3]
+      @checker.options['headers'] = [1, 2, 3]
       expect(@checker).not_to be_valid
 
       @checker.options['headers'] = "hello world"

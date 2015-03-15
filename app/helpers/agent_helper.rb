@@ -7,9 +7,9 @@ module AgentHelper
   end
 
   def scenario_links(agent)
-    agent.scenarios.map { |scenario|
+    agent.scenarios.map do |scenario|
       link_to(scenario.name, scenario, class: "label", style: style_colors(scenario))
-    }.join(" ").html_safe
+    end.join(" ").html_safe
   end
 
   def agent_show_class(agent)
@@ -32,9 +32,9 @@ module AgentHelper
 
   def agent_controllers(agent, delimiter = ', ')
     if agent.controllers.present?
-      agent.controllers.map { |agent|
+      agent.controllers.map do |agent|
         link_to(agent.name, agent_path(agent))
-      }.join(delimiter).html_safe
+      end.join(delimiter).html_safe
     end
   end
 end

@@ -4,7 +4,7 @@ require 'cgi'
 module Utils
   def self.unindent(s)
     s = s.gsub(/\t/, '  ').chomp
-    min = ((s.split("\n").find {|l| l !~ /^\s*$/ })[/^\s+/, 0] || "").length
+    min = ((s.split("\n").find { |l| l !~ /^\s*$/ })[/^\s+/, 0] || "").length
     if min > 0
       s.gsub(/^#{" " * min}/, "")
     else
@@ -25,18 +25,18 @@ module Utils
     if options[:leading_dollarsign_is_jsonpath] && value[0] == '$'
       Utils.values_at(data, value).first.to_s
     else
-      value.gsub(/<[^>]+>/).each { |jsonpath|
+      value.gsub(/<[^>]+>/).each do |jsonpath|
         Utils.values_at(data, jsonpath[1..-2]).first.to_s
-      }
+      end
     end
   end
 
   def self.recursively_interpolate_jsonpaths(struct, data, options = {})
     case struct
       when Hash
-        struct.inject({}) {|memo, (key, value)| memo[key] = recursively_interpolate_jsonpaths(value, data, options); memo }
+        struct.inject({}) { |memo, (key, value)| memo[key] = recursively_interpolate_jsonpaths(value, data, options); memo }
       when Array
-        struct.map {|elem| recursively_interpolate_jsonpaths(elem, data, options) }
+        struct.map { |elem| recursively_interpolate_jsonpaths(elem, data, options) }
       when String
         interpolate_jsonpaths(struct, data, options)
       else
@@ -56,9 +56,9 @@ module Utils
       escape = false
     end
 
-    result = JsonPath.new(path, :allow_eval => ENV['ALLOW_JSONPATH_EVAL'] == "true").on(data.is_a?(String) ? data : data.to_json)
+    result = JsonPath.new(path, allow_eval: ENV['ALLOW_JSONPATH_EVAL'] == "true").on(data.is_a?(String) ? data : data.to_json)
     if escape
-      result.map {|r| CGI::escape r }
+      result.map { |r| CGI.escape r }
     else
       result
     end

@@ -7,7 +7,7 @@ describe Agents::SchedulerAgent do
       options: {
         'action' => 'run',
         'schedule' => '0 * * * *'
-      },
+      }
     }
   }
 

@@ -85,7 +85,7 @@ module Agents
 
     def validate_options
       errors.add(:base, "service is required") unless service.present?
-      errors.add(:base, "service must be set to 'forecastio' or 'wunderground'") unless ["forecastio", "wunderground"].include?(service)
+      errors.add(:base, "service must be set to 'forecastio' or 'wunderground'") unless %w(forecastio wunderground).include?(service)
       errors.add(:base, "location is required") unless location.present?
       errors.add(:base, "api_key is required") unless key_setup?
       errors.add(:base, "which_day selection is required") unless which_day.present?
@@ -99,11 +99,11 @@ module Agents
       if key_setup?
         ForecastIO.api_key = interpolated['api_key']
         lat, lng = location.split(',')
-        ForecastIO.forecast(lat,lng)['daily']['data']
+        ForecastIO.forecast(lat, lng)['daily']['data']
       end
     end
 
-    def model(service,which_day)
+    def model(service, which_day)
       if service == "wunderground"
         wunderground[which_day]
       elsif service == "forecastio"
@@ -121,7 +121,7 @@ module Agents
                 'hour' => timestamp.hour,
                 'min' => timestamp.strftime("%M"),
                 'sec' => timestamp.sec,
-                'isdst' => timestamp.isdst ? 1 : 0 ,
+                'isdst' => timestamp.isdst ? 1 : 0,
                 'monthname' => timestamp.strftime("%B"),
                 'monthname_short' => timestamp.strftime("%b"),
                 'weekday_short' => timestamp.strftime("%a"),
@@ -131,18 +131,18 @@ module Agents
               },
               'period' => which_day.to_i,
               'high' => {
-                'fahrenheit' => value.temperatureMax.round().to_s,
+                'fahrenheit' => value.temperatureMax.round.to_s,
                 'epoch' => value.temperatureMaxTime.to_s,
-                'fahrenheit_apparent' => value.apparentTemperatureMax.round().to_s,
+                'fahrenheit_apparent' => value.apparentTemperatureMax.round.to_s,
                 'epoch_apparent' => value.apparentTemperatureMaxTime.to_s,
-                'celsius' => ((5*(Float(value.temperatureMax) - 32))/9).round().to_s
+                'celsius' => ((5 * (Float(value.temperatureMax) - 32)) / 9).round.to_s
               },
               'low' => {
-                'fahrenheit' => value.temperatureMin.round().to_s,
+                'fahrenheit' => value.temperatureMin.round.to_s,
                 'epoch' => value.temperatureMinTime.to_s,
-                'fahrenheit_apparent' => value.apparentTemperatureMin.round().to_s,
+                'fahrenheit_apparent' => value.apparentTemperatureMin.round.to_s,
                 'epoch_apparent' => value.apparentTemperatureMinTime.to_s,
-                'celsius' => ((5*(Float(value.temperatureMin) - 32))/9).round().to_s
+                'celsius' => ((5 * (Float(value.temperatureMin) - 32)) / 9).round.to_s
               },
               'conditions' => value.summary,
               'icon' => value.icon,
@@ -159,8 +159,8 @@ module Agents
               },
               'dewPoint' => value.dewPoint.to_s,
               'avewind' => {
-                'mph' => value.windSpeed.round().to_s,
-                'kph' =>  (Float(value.windSpeed) * 1.609344).round().to_s,
+                'mph' => value.windSpeed.round.to_s,
+                'kph' =>  (Float(value.windSpeed) * 1.609344).round.to_s,
                 'degrees' => value.windBearing.to_s
               },
               'visibility' => value.visibility.to_s,
@@ -176,9 +176,8 @@ module Agents
 
     def check
       if key_setup?
-        create_event :payload => model(service, which_day).merge('location' => location)
+        create_event payload: model(service, which_day).merge('location' => location)
       end
     end
-
   end
 end

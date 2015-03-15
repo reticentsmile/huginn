@@ -31,5 +31,4 @@ module DropboxConcern
   def oauth_token_secret
     service && service.secret
   end
-
 end

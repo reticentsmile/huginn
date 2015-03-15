@@ -24,7 +24,6 @@ describe Agents::DropboxFileUrlAgent do
   end
 
   describe "#receive" do
-
     let(:first_dropbox_url_payload)  { { 'url' => 'http://dropbox.com/first/path/url' } }
     let(:second_dropbox_url_payload) { { 'url' => 'http://dropbox.com/second/path/url' } }
     let(:third_dropbox_url_payload)  { { 'url' => 'http://dropbox.com/third/path/url' } }
@@ -45,18 +44,15 @@ describe Agents::DropboxFileUrlAgent do
     end
 
     context 'with a single path' do
-
       before(:each) { @event = create_event(paths: '/first/path') }
 
       it 'creates one event with the temporary dropbox link' do
         expect { @agent.receive([@event]) }.to change(Event, :count).by(1)
         expect(Event.last.payload).to eq(first_dropbox_url_payload)
       end
-
     end
 
     context 'with multiple comma-separated paths' do
-
       before(:each) { @event = create_event(paths: '/first/path, /second/path, /third/path') }
 
       it 'creates one event with the temporary dropbox link for each path' do
@@ -66,9 +62,6 @@ describe Agents::DropboxFileUrlAgent do
         expect(last_events[1].payload).to eq(second_dropbox_url_payload)
         expect(last_events[2].payload).to eq(third_dropbox_url_payload)
       end
-
     end
-
   end
-
 end

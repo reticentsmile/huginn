@@ -1,36 +1,34 @@
 require 'spec_helper'
 
 describe Agents::StubhubAgent do
-
   let(:name) { 'Agent Name' }
   let(:url) { 'http://www.stubhub.com/event/name-1-1-2014-12345' }
   let(:parsed_body) { JSON.parse(body)['response']['docs'][0] }
   let(:valid_params) { { 'url' => parsed_body['url'] } }
   let(:body) { File.read(Rails.root.join('spec/data_fixtures/stubhub_data.json')) }
   let(:stubhub_event_id) { 12345 }
-  let(:response_payload) { {
-                            'url' => url,
-                            'name' => parsed_body['seo_description_en_US'],
-                            'date' => parsed_body['event_date_local'],
-                            'max_price' => parsed_body['maxPrice'],
-                            'min_price' => parsed_body['minPrice'],
-                            'total_postings' => parsed_body['totalPostings'],
-                            'total_tickets' => parsed_body['totalTickets'],
-                            'venue_name' => parsed_body['venue_name']
-                            } }
+  let(:response_payload) {
+    {
+      'url' => url,
+      'name' => parsed_body['seo_description_en_US'],
+      'date' => parsed_body['event_date_local'],
+      'max_price' => parsed_body['maxPrice'],
+      'min_price' => parsed_body['minPrice'],
+      'total_postings' => parsed_body['totalPostings'],
+      'total_tickets' => parsed_body['totalTickets'],
+      'venue_name' => parsed_body['venue_name']
+    } }
 
   before do
-      stub_request(:get, "http://www.stubhub.com/listingCatalog/select/?q=%2B%20stubhubDocumentType:event%0D%0A%2B%20event_id:#{stubhub_event_id}%0D%0A&rows=10&start=0&wt=json").
-         to_return(:status => 200, :body => body, :headers => {})
+    stub_request(:get, "http://www.stubhub.com/listingCatalog/select/?q=%2B%20stubhubDocumentType:event%0D%0A%2B%20event_id:#{stubhub_event_id}%0D%0A&rows=10&start=0&wt=json").
+      to_return(status: 200, body: body, headers: {})
 
     @stubhub_agent = described_class.new(name: name, options: valid_params)
     @stubhub_agent.user = users(:jane)
     @stubhub_agent.save!
   end
 
-
   describe "#check" do
-
     it 'should create an event' do
       expect { @stubhub_agent.check }.to change { Event.count }.by(1)
     end
@@ -50,7 +48,6 @@ describe Agents::StubhubAgent do
       @stubhub_agent.options['url'] = nil
       expect(@stubhub_agent).not_to be_valid
     end
-
   end
 
   describe "#working?" do

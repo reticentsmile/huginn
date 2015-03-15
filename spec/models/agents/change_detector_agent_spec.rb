@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe Agents::ChangeDetectorAgent do
-  def create_event(output=nil)
+  def create_event(output = nil)
     event = Event.new
     event.agent = agents(:jane_weather_agent)
     event.payload = {
-      :command => 'some-command',
-      :output => output
+      command: 'some-command',
+      output: output
     }
     event.save!
 
@@ -15,11 +15,11 @@ describe Agents::ChangeDetectorAgent do
 
   before do
     @valid_params = {
-        :property  => "{{output}}",
-        :expected_update_period_in_days => "1",
-      }
+      property: "{{output}}",
+      expected_update_period_in_days: "1"
+    }
 
-    @checker = Agents::ChangeDetectorAgent.new(:name => "somename", :options => @valid_params)
+    @checker = Agents::ChangeDetectorAgent.new(name: "somename", options: @valid_params)
     @checker.user = users(:jane)
     @checker.save!
   end
@@ -56,7 +56,7 @@ describe Agents::ChangeDetectorAgent do
       @checker.options[:expected_update_period_in_days] = 2
 
       time_travel_to 2.days.from_now do
-          expect(@checker).not_to be_working
+        expect(@checker).not_to be_working
       end
     end
   end

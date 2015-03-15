@@ -20,7 +20,7 @@ describe Agents::WebsiteAgent do
           'hovertext' => { 'css' => "#comic img", 'value' => "@title" }
         }
       }
-      @checker = Agents::WebsiteAgent.new(:name => "xkcd", :options => @valid_options, :keep_events_for => 2)
+      @checker = Agents::WebsiteAgent.new(name: "xkcd", options: @valid_options, keep_events_for: 2)
       @checker.user = users(:bob)
       @checker.save!
     end
@@ -130,8 +130,8 @@ describe Agents::WebsiteAgent do
       it "should accept an array for url" do
         @valid_options['url'] = ["http://xkcd.com/1/", "http://xkcd.com/2/"]
         @checker.options = @valid_options
-        expect { @checker.save! }.not_to raise_error;
-        expect { @checker.check }.not_to raise_error;
+        expect { @checker.save! }.not_to raise_error
+        expect { @checker.check }.not_to raise_error
       end
 
       it "should parse events from all urls in array" do
@@ -155,11 +155,11 @@ describe Agents::WebsiteAgent do
     describe 'encoding' do
       it 'should be forced with force_encoding option' do
         huginn = "\u{601d}\u{8003}"
-        stub_request(:any, /no-encoding/).to_return(:body => {
-            :value => huginn,
-          }.to_json.encode(Encoding::EUC_JP), :headers => {
-            'Content-Type' => 'application/json',
-          }, :status => 200)
+        stub_request(:any, /no-encoding/).to_return(body: {
+          value: huginn
+        }.to_json.encode(Encoding::EUC_JP), headers: {
+          'Content-Type' => 'application/json'
+        }, status: 200)
         site = {
           'name' => "Some JSON Response",
           'expected_update_period_in_days' => "2",
@@ -167,11 +167,11 @@ describe Agents::WebsiteAgent do
           'url' => "http://no-encoding.example.com",
           'mode' => 'on_change',
           'extract' => {
-            'value' => { 'path' => 'value' },
+            'value' => { 'path' => 'value' }
           },
-          'force_encoding' => 'EUC-JP',
+          'force_encoding' => 'EUC-JP'
         }
-        checker = Agents::WebsiteAgent.new(:name => "No Encoding Site", :options => site)
+        checker = Agents::WebsiteAgent.new(name: "No Encoding Site", options: site)
         checker.user = users(:bob)
         checker.save!
 
@@ -182,11 +182,11 @@ describe Agents::WebsiteAgent do
 
       it 'should be overridden with force_encoding option' do
         huginn = "\u{601d}\u{8003}"
-        stub_request(:any, /wrong-encoding/).to_return(:body => {
-            :value => huginn,
-          }.to_json.encode(Encoding::EUC_JP), :headers => {
-            'Content-Type' => 'application/json; UTF-8',
-          }, :status => 200)
+        stub_request(:any, /wrong-encoding/).to_return(body: {
+          value: huginn
+        }.to_json.encode(Encoding::EUC_JP), headers: {
+          'Content-Type' => 'application/json; UTF-8'
+        }, status: 200)
         site = {
           'name' => "Some JSON Response",
           'expected_update_period_in_days' => "2",
@@ -194,11 +194,11 @@ describe Agents::WebsiteAgent do
           'url' => "http://wrong-encoding.example.com",
           'mode' => 'on_change',
           'extract' => {
-            'value' => { 'path' => 'value' },
+            'value' => { 'path' => 'value' }
           },
-          'force_encoding' => 'EUC-JP',
+          'force_encoding' => 'EUC-JP'
         }
-        checker = Agents::WebsiteAgent.new(:name => "Wrong Encoding Site", :options => site)
+        checker = Agents::WebsiteAgent.new(name: "Wrong Encoding Site", options: site)
         checker.user = users(:bob)
         checker.save!
 
@@ -240,7 +240,7 @@ describe Agents::WebsiteAgent do
       end
 
       it "parses XPath" do
-        @valid_options['extract'].each { |key, value|
+        @valid_options['extract'].each { |_key, value|
           value.delete('css')
           value['xpath'] = "//*[@id='comic']//img"
         }
@@ -260,10 +260,10 @@ describe Agents::WebsiteAgent do
           'url' => "http://xkcd.com",
           'mode' => "on_change",
           'extract' => {
-            'url' => {'css' => "#topLeft a", 'value' => "@href"},
+            'url' => {'css' => "#topLeft a", 'value' => "@href"}
           }
         }
-        rel = Agents::WebsiteAgent.new(:name => "xkcd", :options => rel_site)
+        rel = Agents::WebsiteAgent.new(name: "xkcd", options: rel_site)
         rel.user = users(:bob)
         rel.save!
         rel.check
@@ -282,7 +282,7 @@ describe Agents::WebsiteAgent do
             'num_links' => {'css' => "#comicLinks", 'value' => "count(./a)"}
           }
         }
-        rel = Agents::WebsiteAgent.new(:name => "xkcd", :options => rel_site)
+        rel = Agents::WebsiteAgent.new(name: "xkcd", options: rel_site)
         rel.user = users(:bob)
         rel.save!
         rel.check
@@ -301,7 +301,7 @@ describe Agents::WebsiteAgent do
             'slogan' => {'css' => "#slogan", 'value' => ".//text()"}
           }
         }
-        rel = Agents::WebsiteAgent.new(:name => "xkcd", :options => rel_site)
+        rel = Agents::WebsiteAgent.new(name: "xkcd", options: rel_site)
         rel.user = users(:bob)
         rel.save!
         rel.check
@@ -328,7 +328,7 @@ describe Agents::WebsiteAgent do
               'title' => "hello!"
             }
           }
-          stub_request(:any, /json-site/).to_return(:body => json.to_json, :status => 200)
+          stub_request(:any, /json-site/).to_return(body: json.to_json, status: 200)
           site = {
             'name' => "Some JSON Response",
             'expected_update_period_in_days' => "2",
@@ -340,7 +340,7 @@ describe Agents::WebsiteAgent do
               'title' => {'path' => "response.title"}
             }
           }
-          checker = Agents::WebsiteAgent.new(:name => "Weather Site", :options => site)
+          checker = Agents::WebsiteAgent.new(name: "Weather Site", options: site)
           checker.user = users(:bob)
           checker.save!
 
@@ -359,7 +359,7 @@ describe Agents::WebsiteAgent do
               ]
             }
           }
-          stub_request(:any, /json-site/).to_return(:body => json.to_json, :status => 200)
+          stub_request(:any, /json-site/).to_return(body: json.to_json, status: 200)
           site = {
             'name' => "Some JSON Response",
             'expected_update_period_in_days' => "2",
@@ -367,11 +367,11 @@ describe Agents::WebsiteAgent do
             'url' => "http://json-site.com",
             'mode' => 'on_change',
             'extract' => {
-              :title => {'path' => "response.data[*].title"},
-              :version => {'path' => "response.data[*].version"}
+              title: {'path' => "response.data[*].title"},
+              version: {'path' => "response.data[*].version"}
             }
           }
-          checker = Agents::WebsiteAgent.new(:name => "Weather Site", :options => site)
+          checker = Agents::WebsiteAgent.new(name: "Weather Site", options: site)
           checker.user = users(:bob)
           checker.save!
 
@@ -395,7 +395,7 @@ describe Agents::WebsiteAgent do
               'title' => "hello!"
             }
           }
-          stub_request(:any, /json-site/).to_return(:body => json.to_json, :status => 200)
+          stub_request(:any, /json-site/).to_return(body: json.to_json, status: 200)
           site = {
             'name' => "Some JSON Response",
             'expected_update_period_in_days' => "2",
@@ -403,7 +403,7 @@ describe Agents::WebsiteAgent do
             'url' => "http://json-site.com",
             'mode' => 'on_change'
           }
-          checker = Agents::WebsiteAgent.new(:name => "Weather Site", :options => site)
+          checker = Agents::WebsiteAgent.new(name: "Weather Site", options: site)
           checker.user = users(:bob)
           checker.save!
 
@@ -428,7 +428,7 @@ fire: hot
             'mode' => 'on_change',
             'extract' => {
               'word' => { 'regexp' => '^(.+?): (.+)$', index: 1 },
-              'property' => { 'regexp' => '^(.+?): (.+)$', index: 2 },
+              'property' => { 'regexp' => '^(.+?): (.+)$', index: 2 }
             }
           }
           @checker = Agents::WebsiteAgent.new(name: 'Text Site', options: site)
@@ -438,9 +438,9 @@ fire: hot
 
         it "works with regexp" do
           @checker.options = @checker.options.merge('extract' => {
-            'word' => { 'regexp' => '^(?<word>.+?): (?<property>.+)$', index: 'word' },
-            'property' => { 'regexp' => '^(?<word>.+?): (?<property>.+)$', index: 'property' },
-          })
+                                                      'word' => { 'regexp' => '^(?<word>.+?): (?<property>.+)$', index: 'word' },
+                                                      'property' => { 'regexp' => '^(?<word>.+?): (?<property>.+)$', index: 'property' }
+                                                    })
 
           expect {
             @checker.check
@@ -473,7 +473,7 @@ fire: hot
         @event.agent = agents(:bob_rain_notifier_agent)
         @event.payload = {
           'url' => 'http://xkcd.com',
-          'link' => 'Random',
+          'link' => 'Random'
         }
       end
 
@@ -494,16 +494,14 @@ fire: hot
             'to' => {
               'xpath' => '(//a[@href and text()={{link | to_xpath}}])[1]',
               'value' => '@href'
-            },
+            }
           }
           @checker.options = @valid_options
           @checker.receive([@event])
         }.to change { Event.count }.by(1)
 
-        expect(Event.last.payload).to eq({
-          'from' => 'http://xkcd.com',
-          'to' => 'http://dynamic.xkcd.com/random/comic/',
-        })
+        expect(Event.last.payload).to eq('from' => 'http://xkcd.com',
+                                         'to' => 'http://dynamic.xkcd.com/random/comic/')
       end
 
       it "should interpolate values from incoming event payload and _response_" do
@@ -538,7 +536,7 @@ fire: hot
     before do
       stub_request(:any, /example/).
         with(headers: { 'Authorization' => "Basic #{['user:pass'].pack('m').chomp}" }).
-        to_return(:body => File.read(Rails.root.join("spec/data_fixtures/xkcd.html")), :status => 200)
+        to_return(body: File.read(Rails.root.join("spec/data_fixtures/xkcd.html")), status: 200)
       @valid_options = {
         'name' => "XKCD",
         'expected_update_period_in_days' => "2",
@@ -552,7 +550,7 @@ fire: hot
         },
         'basic_auth' => "user:pass"
       }
-      @checker = Agents::WebsiteAgent.new(:name => "auth", :options => @valid_options)
+      @checker = Agents::WebsiteAgent.new(name: "auth", options: @valid_options)
       @checker.user = users(:bob)
       @checker.save!
     end
@@ -569,7 +567,7 @@ fire: hot
     before do
       stub_request(:any, /example/).
         with(headers: { 'foo' => 'bar' }).
-        to_return(:body => File.read(Rails.root.join("spec/data_fixtures/xkcd.html")), :status => 200)
+        to_return(body: File.read(Rails.root.join("spec/data_fixtures/xkcd.html")), status: 200)
       @valid_options = {
         'name' => "XKCD",
         'expected_update_period_in_days' => "2",
@@ -578,10 +576,10 @@ fire: hot
         'mode' => 'on_change',
         'headers' => { 'foo' => 'bar' },
         'extract' => {
-          'url' => { 'css' => "#comic img", 'value' => "@src" },
+          'url' => { 'css' => "#comic img", 'value' => "@src" }
         }
       }
-      @checker = Agents::WebsiteAgent.new(:name => "ua", :options => @valid_options)
+      @checker = Agents::WebsiteAgent.new(name: "ua", options: @valid_options)
       @checker.user = users(:bob)
       @checker.save!
     end

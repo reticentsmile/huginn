@@ -3,24 +3,24 @@ require 'spec_helper'
 describe Agents::EventFormattingAgent do
   before do
     @valid_params = {
-        :name => "somename",
-        :options => {
-            :instructions => {
-                :message => "Received {{content.text}} from {{content.name}} .",
-                :subject => "Weather looks like {{conditions}} according to the forecast at {{pretty_date.time}}",
-                :agent => "{{agent.type}}",
-                :created_at => "{{created_at}}",
-                :created_at_iso => "{{created_at | date:'%FT%T%:z'}}",
-            },
-            :mode => "clean",
-            :matchers => [
-                {
-                    :path => "{{date.pretty}}",
-                    :regexp => "\\A(?<time>\\d\\d:\\d\\d [AP]M [A-Z]+)",
-                    :to => "pretty_date",
-                },
-            ],
-        }
+      name: "somename",
+      options: {
+        instructions: {
+          message: "Received {{content.text}} from {{content.name}} .",
+          subject: "Weather looks like {{conditions}} according to the forecast at {{pretty_date.time}}",
+          agent: "{{agent.type}}",
+          created_at: "{{created_at}}",
+          created_at_iso: "{{created_at | date:'%FT%T%:z'}}"
+        },
+        mode: "clean",
+        matchers: [
+          {
+            path: "{{date.pretty}}",
+            regexp: "\\A(?<time>\\d\\d:\\d\\d [AP]M [A-Z]+)",
+            to: "pretty_date"
+          }
+        ]
+      }
     }
     @checker = Agents::EventFormattingAgent.new(@valid_params)
     @checker.user = users(:jane)
@@ -30,15 +30,15 @@ describe Agents::EventFormattingAgent do
     @event.agent = agents(:jane_weather_agent)
     @event.created_at = Time.now
     @event.payload = {
-        :content => {
-            :text => "Some Lorem Ipsum",
-            :name => "somevalue",
-        },
-        :date => {
-            :epoch => "1357959600",
-            :pretty => "10:00 PM EST on January 11, 2013"
-        },
-        :conditions => "someothervalue"
+      content: {
+        text: "Some Lorem Ipsum",
+        name: "somevalue"
+      },
+      date: {
+        epoch: "1357959600",
+        pretty: "10:00 PM EST on January 11, 2013"
+      },
+      conditions: "someothervalue"
     }
   end
 
@@ -80,21 +80,21 @@ describe Agents::EventFormattingAgent do
       event1 = Event.new
       event1.agent = agents(:bob_weather_agent)
       event1.payload = {
-          :content => {
-              :text => "Some Lorem Ipsum",
-              :name => "somevalue"
-          },
-          :conditions => "someothervalue"
+        content: {
+          text: "Some Lorem Ipsum",
+          name: "somevalue"
+        },
+        conditions: "someothervalue"
       }
 
       event2 = Event.new
       event2.agent = agents(:bob_weather_agent)
       event2.payload = {
-          :content => {
-              :text => "Some Lorem Ipsum",
-              :name => "somevalue"
-          },
-          :conditions => "someothervalue"
+        content: {
+          text: "Some Lorem Ipsum",
+          name: "somevalue"
+        },
+        conditions: "someothervalue"
       }
 
       expect {
@@ -126,11 +126,11 @@ describe Agents::EventFormattingAgent do
       ]
       expect(@checker).not_to be_valid
       @checker.options[:matchers] = [
-        { :regexp => "(not closed", :path => "text" }
+        { regexp: "(not closed", path: "text" }
       ]
       expect(@checker).not_to be_valid
       @checker.options[:matchers] = [
-        { :regexp => "(closed)", :path => "text", :to => "foo" }
+        { regexp: "(closed)", path: "text", to: "foo" }
       ]
       expect(@checker).to be_valid
     end

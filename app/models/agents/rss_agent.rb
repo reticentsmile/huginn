@@ -80,17 +80,17 @@ module Agents
           if check_and_track(entry_id)
             created_event_count += 1
             create_event(payload: {
-              id: entry_id,
-              date_published: entry.date_published,
-              last_updated: entry.last_updated,
-              url: entry.url,
-              urls: entry.urls,
-              description: entry.description,
-              content: entry.content,
-              title: entry.title,
-              authors: entry.authors,
-              categories: entry.categories
-            })
+                           id: entry_id,
+                           date_published: entry.date_published,
+                           last_updated: entry.last_updated,
+                           url: entry.url,
+                           urls: entry.urls,
+                           description: entry.description,
+                           content: entry.content,
+                           title: entry.title,
+                           authors: entry.authors,
+                           categories: entry.categories
+                         })
           end
         end
         log "Fetched #{interpolated['url']} and created #{created_event_count} event(s)."

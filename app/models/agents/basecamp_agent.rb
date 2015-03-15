@@ -41,7 +41,7 @@ module Agents
 
     def default_options
       {
-        'project_id' => '',
+        'project_id' => ''
       }
     end
 
@@ -50,7 +50,7 @@ module Agents
     def complete_project_id
       service.prepare_request
       response = HTTParty.get projects_url, request_options.merge(query_parameters)
-      response.map { |p| {text: "#{p['name']} (#{p['id']})", id: p['id']}}
+      response.map { |p| {text: "#{p['name']} (#{p['id']})", id: p['id']} }
     end
 
     def validate_options
@@ -65,16 +65,16 @@ module Agents
       service.prepare_request
       response = HTTParty.get events_url, request_options.merge(query_parameters)
       events = JSON.parse(response.body)
-      if !memory[:last_event].nil?
+      unless memory[:last_event].nil?
         events.each do |event|
-          create_event :payload => event
+          create_event payload: event
         end
       end
       memory[:last_event] = events.first['created_at'] if events.length > 0
       save!
     end
 
-  private
+    private
     def base_url
       "https://basecamp.com/#{URI.encode(service.options[:user_id].to_s)}/api/v1/"
     end
@@ -88,11 +88,11 @@ module Agents
     end
 
     def request_options
-      {:headers => {"User-Agent" => "Huginn (https://github.com/cantino/huginn)", "Authorization" => "Bearer \"#{service.token}\""}}
+      {headers: {"User-Agent" => "Huginn (https://github.com/cantino/huginn)", "Authorization" => "Bearer \"#{service.token}\""}}
     end
 
     def query_parameters
-      memory[:last_event].present? ? { :query => {:since => memory[:last_event]} } : {}
+      memory[:last_event].present? ? { query: {since: memory[:last_event]} } : {}
     end
   end
 end

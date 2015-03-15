@@ -7,15 +7,14 @@ describe Agents::FtpsiteAgent do
       @site = {
         'expected_update_period_in_days' => 1,
         'url' => "ftp://ftp.example.org/pub/releases/",
-        'patterns' => ["example*.tar.gz"],
+        'patterns' => ["example*.tar.gz"]
       }
-      @checker = Agents::FtpsiteAgent.new(:name => "Example", :options => @site, :keep_events_for => 2)
+      @checker = Agents::FtpsiteAgent.new(name: "Example", options: @site, keep_events_for: 2)
       @checker.user = users(:bob)
       @checker.save!
     end
 
     describe "#check" do
-
       before do
         stub(@checker).each_entry.returns { |block|
           block.call("example latest.tar.gz", Time.parse("2014-04-01T10:00:01Z"))
@@ -26,7 +25,7 @@ describe Agents::FtpsiteAgent do
 
       it "should validate the integer fields" do
         @checker.options['expected_update_period_in_days'] = "nonsense"
-        expect { @checker.save! }.to raise_error;
+        expect { @checker.save! }.to raise_error
         @checker.options = @site
       end
 
@@ -37,15 +36,13 @@ describe Agents::FtpsiteAgent do
           expect(known_entries.sort_by(&:last)).to eq([
             ["example-1.0.tar.gz",    "2013-10-01T10:00:00Z"],
             ["example-1.1.tar.gz",    "2014-04-01T10:00:00Z"],
-            ["example latest.tar.gz", "2014-04-01T10:00:01Z"],
+            ["example latest.tar.gz", "2014-04-01T10:00:01Z"]
           ])
         }
 
-        expect(Event.last(2).first.payload).to eq({
-          'url' => 'ftp://ftp.example.org/pub/releases/example-1.1.tar.gz',
-          'filename' => 'example-1.1.tar.gz',
-          'timestamp' => '2014-04-01T10:00:00Z',
-        })
+        expect(Event.last(2).first.payload).to eq('url' => 'ftp://ftp.example.org/pub/releases/example-1.1.tar.gz',
+                                                  'filename' => 'example-1.1.tar.gz',
+                                                  'timestamp' => '2014-04-01T10:00:00Z')
 
         expect { @checker.check }.not_to change { Event.count }
 
@@ -66,21 +63,17 @@ describe Agents::FtpsiteAgent do
             ["example-1.0.tar.gz",    "2013-10-01T00:00:00Z"],
             ["example-1.1.tar.gz",    "2014-04-01T10:00:00Z"],
             ["example-1.2.tar.gz",    "2014-04-02T10:00:00Z"],
-            ["example latest.tar.gz", "2014-04-02T10:00:01Z"],
+            ["example latest.tar.gz", "2014-04-02T10:00:01Z"]
           ])
         }
 
-        expect(Event.last(2).first.payload).to eq({
-          'url' => 'ftp://ftp.example.org/pub/releases/example-1.2.tar.gz',
-          'filename' => 'example-1.2.tar.gz',
-          'timestamp' => '2014-04-02T10:00:00Z',
-        })
+        expect(Event.last(2).first.payload).to eq('url' => 'ftp://ftp.example.org/pub/releases/example-1.2.tar.gz',
+                                                  'filename' => 'example-1.2.tar.gz',
+                                                  'timestamp' => '2014-04-02T10:00:00Z')
 
-        expect(Event.last.payload).to eq({
-          'url' => 'ftp://ftp.example.org/pub/releases/example%20latest.tar.gz',
-          'filename' => 'example latest.tar.gz',
-          'timestamp' => '2014-04-02T10:00:01Z',
-        })
+        expect(Event.last.payload).to eq('url' => 'ftp://ftp.example.org/pub/releases/example%20latest.tar.gz',
+                                         'filename' => 'example latest.tar.gz',
+                                         'timestamp' => '2014-04-02T10:00:01Z')
 
         expect { @checker.check }.not_to change { Event.count }
       end
@@ -112,6 +105,5 @@ describe Agents::FtpsiteAgent do
         expect(entries.size).to eq(0)
       end
     end
-
   end
 end

@@ -1,11 +1,11 @@
 module LiquidMigrator
   def self.convert_all_agent_options(agent)
-    agent.options = self.convert_hash(agent.options, {:merge_path_attributes => true, :leading_dollarsign_is_jsonpath => true})
+    agent.options = convert_hash(agent.options, merge_path_attributes: true, leading_dollarsign_is_jsonpath: true)
     agent.save!
   end
 
-  def self.convert_hash(hash, options={})
-    options = {:merge_path_attributes => false, :leading_dollarsign_is_jsonpath => false}.merge options
+  def self.convert_hash(hash, options = {})
+    options = {merge_path_attributes: false, leading_dollarsign_is_jsonpath: false}.merge options
     keys_to_remove = []
     hash.tap do |hash|
       hash.each_pair do |key, value|
@@ -22,20 +22,20 @@ module LiquidMigrator
         when 'ActiveSupport::HashWithIndifferentAccess'
           hash[key] = convert_hash(hash[key], options)
         when 'Array'
-          hash[key] = hash[key].collect { |k|
+          hash[key] = hash[key].collect do |k|
             if k.class == String
               convert_string(k, options[:leading_dollarsign_is_jsonpath])
             else
               convert_hash(k, options)
             end
-          }
+          end
         end
       end
-        # remove the unneeded *_path attributes
-    end.select { |k, v| !keys_to_remove.include? k }
+      # remove the unneeded *_path attributes
+    end.select { |k, _v| !keys_to_remove.include? k }
   end
 
-  def self.convert_string(string, leading_dollarsign_is_jsonpath=false)
+  def self.convert_string(string, leading_dollarsign_is_jsonpath = false)
     if string == true || string == false
       # there might be empty *_path attributes for boolean defaults
       string
@@ -45,12 +45,12 @@ module LiquidMigrator
     else
       # migrate the old interpolation syntax to the new liquid based
       string.gsub(/<([^>]+)>/).each do
-        match = $1
+        match = Regexp.last_match(1)
         if match =~ /\Aescape /
           # convert the old escape syntax to a liquid filter
-          self.convert_json_path(match.gsub(/\Aescape /, '').strip, ' | uri_escape')
+          convert_json_path(match.gsub(/\Aescape /, '').strip, ' | uri_escape')
         else
-          self.convert_json_path(match.strip)
+          convert_json_path(match.strip)
         end
       end
     end
@@ -71,8 +71,7 @@ module LiquidMigrator
 
   def self.check_path(string)
     if string !~ /\A(\$\.?)?(\w+\.)*(\w+)\Z/
-      raise "JSONPath '#{string}' is too complex, please check your migration."
+      fail "JSONPath '#{string}' is too complex, please check your migration."
     end
   end
 end
-

@@ -3,7 +3,6 @@ require 'mqtt'
 require './spec/support/fake_mqtt_server'
 
 describe Agents::MqttAgent do
-
   before :each do
     @error_log = StringIO.new
 
@@ -20,9 +19,9 @@ describe Agents::MqttAgent do
     }
 
     @checker = Agents::MqttAgent.new(
-      :name => "somename", 
-      :options => @valid_params, 
-      :schedule => "midnight",
+      name: "somename",
+      options: @valid_params,
+      schedule: "midnight"
     )
     @checker.user = users(:jane)
     @checker.save!

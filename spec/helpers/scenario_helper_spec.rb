@@ -28,5 +28,4 @@ describe ScenarioHelper do
       )
     end
   end
-
 end

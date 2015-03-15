@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe JobsController do
-
   describe "GET index" do
     before do
       Delayed::Job.create!

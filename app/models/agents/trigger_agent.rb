@@ -2,7 +2,7 @@ module Agents
   class TriggerAgent < Agent
     cannot_be_scheduled!
 
-    VALID_COMPARISON_TYPES = %w[regex !regex field<value field<=value field==value field!=value field>=value field>value]
+    VALID_COMPARISON_TYPES = %w(regex !regex field<value field<=value field==value field!=value field>=value field>value)
 
     description <<-MD
       Use a TriggerAgent to watch for a specific value in an Event payload.
@@ -11,7 +11,7 @@ module Agents
 
       The `type` can be one of #{VALID_COMPARISON_TYPES.map { |t| "`#{t}`" }.to_sentence} and compares with the `value`.
 
-      The `value` can be a single value or an array of values. In the case of an array, if one or more values match then the rule matches. 
+      The `value` can be a single value or an array of values. In the case of an array, if one or more values match then the rule matches.
 
       All rules must match for the Agent to match.  The resulting Event will have a payload message of `message`.  You can use liquid templating in the `message, have a look at the [Wiki](https://github.com/cantino/huginn/wiki/Formatting-Events-using-Liquid) for details.
 
@@ -34,7 +34,7 @@ module Agents
 
       errors.add(:base, "message is required unless 'keep_event' is 'true'") unless options['message'].present? || keep_event?
 
-      errors.add(:base, "keep_event, when present, must be 'true' or 'false'") unless options['keep_event'].blank? || %w[true false].include?(options['keep_event'])
+      errors.add(:base, "keep_event, when present, must be 'true' or 'false'") unless options['keep_event'].blank? || %w(true false).include?(options['keep_event'])
     end
 
     def default_options
@@ -42,10 +42,10 @@ module Agents
         'expected_receive_period_in_days' => "2",
         'keep_event' => 'false',
         'rules' => [{
-                      'type' => "regex",
-                      'value' => "foo\\d+bar",
-                      'path' => "topkey.subkey.subkey.goal",
-                    }],
+          'type' => "regex",
+          'value' => "foo\\d+bar",
+          'path' => "topkey.subkey.subkey.goal"
+        }],
         'message' => "Looks like your pattern matched in '{{value}}'!"
       }
     end
@@ -56,7 +56,6 @@ module Agents
 
     def receive(incoming_events)
       incoming_events.each do |event|
-
         opts = interpolated(event)
 
         match = opts['rules'].all? do |rule|
@@ -83,7 +82,7 @@ module Agents
             when "field!=value"
               value_at_path.to_s != rule_value.to_s
             else
-              raise "Invalid type of #{rule['type']} in TriggerAgent##{id}"
+              fail "Invalid type of #{rule['type']} in TriggerAgent##{id}"
             end
           end
         end
@@ -96,7 +95,7 @@ module Agents
             payload = { 'message' => opts['message'] }
           end
 
-          create_event :payload => payload
+          create_event payload: payload
         end
       end
     end

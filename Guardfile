@@ -22,4 +22,3 @@ guard :rspec, cmd: 'bundle exec spring rspec' do
   watch('app/controllers/application_controller.rb')  { "spec/controllers" }
   watch('spec/rails_helper.rb')                       { "spec" }
 end
-

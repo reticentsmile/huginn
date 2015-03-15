@@ -38,9 +38,9 @@ module Agents
         'expected_update_period_in_days' => "1",
         'url' => "ftp://example.org/pub/releases/",
         'patterns' => [
-          'foo-*.tar.gz',
+          'foo-*.tar.gz'
         ],
-        'after' => Time.now.iso8601,
+        'after' => Time.now.iso8601
       }
     end
 
@@ -48,9 +48,9 @@ module Agents
       # Check for required fields
       begin
         url = options['url']
-        String === url or raise
+        String === url || fail
         uri = URI(url)
-        URI::FTP === uri or raise
+        URI::FTP === uri || fail
         errors.add(:base, "url must end with a slash") unless uri.path.end_with?('/')
       rescue
         errors.add(:base, "url must be a valid FTP URL")
@@ -84,9 +84,9 @@ module Agents
 
     def check
       saving_entries do |found|
-        each_entry { |filename, mtime|
+        each_entry do |filename, mtime|
           found[filename, mtime]
-        }
+        end
       end
     end
 
@@ -110,12 +110,12 @@ module Agents
           entry = Net::FTP::List.parse line
           filename = entry.basename
           mtime = Time.parse(entry.mtime.to_s).utc
-          
-          patterns.any? { |pattern|
-            File.fnmatch?(pattern, filename)
-          } or next
 
-          after < mtime or next
+          patterns.any? do |pattern|
+            File.fnmatch?(pattern, filename)
+          end || next
+
+          after < mtime || next
 
           yield filename, mtime
         end
@@ -171,15 +171,15 @@ module Agents
         end
       }
 
-      new_files.sort_by { |filename|
+      new_files.sort_by do |filename|
         found_entries[filename]
-      }.each { |filename|
+      end.each do |filename|
         create_event payload: {
           'url' => (base_uri + uri_path_escape(filename)).to_s,
           'filename' => filename,
-          'timestamp' => found_entries[filename],
+          'timestamp' => found_entries[filename]
         }
-      }
+      end
 
       memory['known_entries'] = found_entries
       save!
@@ -195,9 +195,9 @@ module Agents
 
     def uri_path_escape(string)
       str = string.dup.force_encoding(Encoding::ASCII_8BIT)  # string.b in Ruby >=2.0
-      str.gsub!(/([^A-Za-z0-9\-._~!$&()*+,=@]+)/) { |m|
+      str.gsub!(/([^A-Za-z0-9\-._~!$&()*+,=@]+)/) do |m|
         '%' + m.unpack('H2' * m.bytesize).join('%').upcase
-      }
+      end
       str.force_encoding(Encoding::US_ASCII)
     end
   end

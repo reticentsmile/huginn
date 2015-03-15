@@ -16,12 +16,11 @@
 #   * Only handles a single connection at a time
 #
 
-$:.unshift File.dirname(__FILE__)+'/../lib'
+$LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
 
 require 'logger'
 require 'socket'
 require 'mqtt'
-
 
 class MQTT::FakeServer
   attr_reader :address, :port
@@ -35,7 +34,7 @@ class MQTT::FakeServer
   #
   # If no port is given, bind to a random port number
   # If no bind address is given, bind to localhost
-  def initialize(port=nil, bind_address='127.0.0.1')
+  def initialize(port = nil, bind_address = '127.0.0.1')
     @port = port
     @address = bind_address
   end
@@ -84,7 +83,6 @@ class MQTT::FakeServer
     end
   end
 
-
   protected
 
   # Given a client socket, process MQTT packets from the client
@@ -95,41 +93,41 @@ class MQTT::FakeServer
 
       case packet
         when MQTT::Packet::Connect
-          client.write MQTT::Packet::Connack.new(:return_code => 0)
+          client.write MQTT::Packet::Connack.new(return_code: 0)
         when MQTT::Packet::Publish
           client.write packet
           @last_publish = packet
         when MQTT::Packet::Subscribe
           client.write MQTT::Packet::Suback.new(
-            :message_id => packet.message_id,
-            :granted_qos => 0
+            message_id: packet.message_id,
+            granted_qos: 0
           )
           topic = packet.topics[0][0]
           case @times
           when 1, ->x { x >= 3 }
             # Deliver retained messages
             client.write MQTT::Packet::Publish.new(
-              :topic => topic,
-              :payload => "did you know about #{topic}",
-              :retain => true
+              topic: topic,
+              payload: "did you know about #{topic}",
+              retain: true
             )
             client.write MQTT::Packet::Publish.new(
-              :topic => topic,
-              :payload => "hello #{topic}",
-              :retain => true
+              topic: topic,
+              payload: "hello #{topic}",
+              retain: true
             )
           when 2
             # Deliver a still retained message
             client.write MQTT::Packet::Publish.new(
-              :topic => topic,
-              :payload => "hello #{topic}",
-              :retain => true
+              topic: topic,
+              payload: "hello #{topic}",
+              retain: true
             )
             # Deliver a fresh message
             client.write MQTT::Packet::Publish.new(
-              :topic => topic,
-              :payload => "did you know about #{topic}",
-              :retain => false
+              topic: topic,
+              payload: "did you know about #{topic}",
+              retain: false
             )
           end
 
@@ -138,7 +136,7 @@ class MQTT::FakeServer
           @pings_received += 1
         when MQTT::Packet::Disconnect
           client.close
-        break
+          break
       end
     end
 
@@ -146,10 +144,9 @@ class MQTT::FakeServer
       logger.warn "Protocol error, closing connection: #{e}"
       client.close
   end
-
 end
 
-if __FILE__ == $0
+if __FILE__ == $PROGRAM_NAME
   server = MQTT::FakeServer.new(MQTT::DEFAULT_PORT)
   server.logger.level = Logger::DEBUG
   server.run

@@ -12,10 +12,10 @@ class Location
 
     case data
     when Array
-      raise ArgumentError, 'unsupported location data' unless data.size == 2
+      fail ArgumentError, 'unsupported location data' unless data.size == 2
       self.lat, self.lng = data
     when Hash, Location
-      data.each { |key, value|
+      data.each do |key, value|
         case key.to_sym
         when :lat, :latitude
           self.lat = value
@@ -28,39 +28,39 @@ class Location
         when :course
           self.course = value
         end
-      }
+      end
     else
-      raise ArgumentError, 'unsupported location data'
+      fail ArgumentError, 'unsupported location data'
     end
 
     yield self if block_given?
   end
 
   def lat=(value)
-    self[:lat] = floatify(value) { |f|
+    self[:lat] = floatify(value) do |f|
       if f.abs <= 90
         f
       else
-        raise ArgumentError, 'out of bounds'
+        fail ArgumentError, 'out of bounds'
       end
-    }
+    end
   end
 
-  alias latitude  lat
-  alias latitude= lat=
+  alias_method :latitude,  :lat
+  alias_method :latitude=, :lat=
 
   def lng=(value)
-    self[:lng] = floatify(value) { |f|
+    self[:lng] = floatify(value) do |f|
       if f.abs <= 180
         f
       else
-        raise ArgumentError, 'out of bounds'
+        fail ArgumentError, 'out of bounds'
       end
-    }
+    end
   end
 
-  alias longitude  lng
-  alias longitude= lng=
+  alias_method :longitude,  :lng
+  alias_method :longitude=, :lng=
 
   def radius=(value)
     self[:radius] = floatify(value) { |f| f if f >= 0 }
@@ -104,7 +104,7 @@ class Location
 end
 
 class LocationDrop
-  KEYS = Location.members.map(&:to_s).concat(%w[latitude longitude latlng])
+  KEYS = Location.members.map(&:to_s).concat(%w(latitude longitude latlng))
 
   def before_method(key)
     if KEYS.include?(key)

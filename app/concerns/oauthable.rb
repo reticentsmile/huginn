@@ -1,7 +1,7 @@
 module Oauthable
   extend ActiveSupport::Concern
 
-  included do |base|
+  included do |_base|
     @valid_oauth_providers = :all
     attr_accessible :service_id
     validates_presence_of :service_id

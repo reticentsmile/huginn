@@ -14,9 +14,9 @@ module LiquidDroppable
     end
 
     def each
-      (public_instance_methods - Drop.public_instance_methods).each { |name|
+      (public_instance_methods - Drop.public_instance_methods).each do |name|
         yield [name, __send__(name)]
-      }
+      end
     end
   end
 
@@ -31,11 +31,11 @@ module LiquidDroppable
   require 'uri'
 
   class URIDrop < Drop
-    URI::Generic::COMPONENT.each { |attr|
-      define_method(attr) {
+    URI::Generic::COMPONENT.each do |attr|
+      define_method(attr) do
         @object.__send__(attr)
-      }
-    }
+      end
+    end
   end
 
   class ::URI::Generic

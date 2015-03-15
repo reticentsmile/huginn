@@ -3,19 +3,19 @@ require 'spec_helper'
 describe Agents::SlackAgent do
   before(:each) do
     @valid_params = {
-                      'webhook_url' => 'https://hooks.slack.com/services/random1/random2/token',
-                      'channel' => '#random',
-                      'username' => "{{username}}",
-                      'message' => "{{message}}"
-                    }
+      'webhook_url' => 'https://hooks.slack.com/services/random1/random2/token',
+      'channel' => '#random',
+      'username' => "{{username}}",
+      'message' => "{{message}}"
+    }
 
-    @checker = Agents::SlackAgent.new(:name => "slacker", :options => @valid_params)
+    @checker = Agents::SlackAgent.new(name: "slacker", options: @valid_params)
     @checker.user = users(:jane)
     @checker.save!
 
     @event = Event.new
     @event.agent = agents(:bob_weather_agent)
-    @event.payload = { :channel => '#random', :message => 'Looks like its going to rain', username: "Huggin user"}
+    @event.payload = { channel: '#random', message: 'Looks like its going to rain', username: "Huggin user"}
     @event.save!
   end
 

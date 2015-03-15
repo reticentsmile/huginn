@@ -19,11 +19,11 @@ describe Event do
     it "returns a default hash when an event does not have a location" do
       event = events(:bob_website_agent_event)
       expect(event.location).to eq(Location.new(
-        lat: nil,
-        lng: nil,
-        radius: 0.0,
-        speed: nil,
-        course: nil))
+                                     lat: nil,
+                                     lng: nil,
+                                     radius: 0.0,
+                                     speed: nil,
+                                     course: nil))
     end
 
     it "returns a hash containing location information" do
@@ -33,15 +33,15 @@ describe Event do
       event.payload = {
         radius: 300,
         speed: 0.5,
-        course: 90.0,
+        course: 90.0
       }
       event.save!
       expect(event.location).to eq(Location.new(
-        lat: 2.0,
-        lng: 3.0,
-        radius: 0.0,
-        speed: 0.5,
-        course: 90.0))
+                                     lat: 2.0,
+                                     lng: 3.0,
+                                     radius: 0.0,
+                                     speed: 0.5,
+                                     course: 90.0))
     end
   end
 
@@ -63,10 +63,10 @@ describe Event do
 
   describe ".cleanup_expired!" do
     it "removes any Events whose expired_at date is non-null and in the past, updating Agent counter caches" do
-      half_hour_event = agents(:jane_weather_agent).create_event :expires_at => 20.minutes.from_now
-      one_hour_event = agents(:bob_weather_agent).create_event :expires_at => 1.hours.from_now
-      two_hour_event = agents(:jane_weather_agent).create_event :expires_at => 2.hours.from_now
-      three_hour_event = agents(:jane_weather_agent).create_event :expires_at => 3.hours.from_now
+      half_hour_event = agents(:jane_weather_agent).create_event expires_at: 20.minutes.from_now
+      one_hour_event = agents(:bob_weather_agent).create_event expires_at: 1.hours.from_now
+      two_hour_event = agents(:jane_weather_agent).create_event expires_at: 2.hours.from_now
+      three_hour_event = agents(:jane_weather_agent).create_event expires_at: 3.hours.from_now
       non_expiring_event = agents(:bob_weather_agent).create_event({})
 
       initial_bob_count = agents(:bob_weather_agent).reload.events_count
@@ -136,25 +136,25 @@ describe Event do
     describe "when an event is created" do
       it "updates a counter cache on agent" do
         expect {
-          agents(:jane_weather_agent).events.create!(:user => users(:jane))
+          agents(:jane_weather_agent).events.create!(user: users(:jane))
         }.to change { agents(:jane_weather_agent).reload.events_count }.by(1)
       end
 
       it "updates last_event_at on agent" do
         expect {
-          agents(:jane_weather_agent).events.create!(:user => users(:jane))
+          agents(:jane_weather_agent).events.create!(user: users(:jane))
         }.to change { agents(:jane_weather_agent).reload.last_event_at }
       end
     end
 
     describe "when an event is updated" do
       it "does not touch the last_event_at on the agent" do
-        event = agents(:jane_weather_agent).events.create!(:user => users(:jane))
+        event = agents(:jane_weather_agent).events.create!(user: users(:jane))
 
         agents(:jane_weather_agent).update_attribute :last_event_at, 2.days.ago
 
         expect {
-          event.update_attribute :payload, { 'hello' => 'world' }
+          event.update_attribute :payload, 'hello' => 'world'
         }.not_to change { agents(:jane_weather_agent).reload.last_event_at }
       end
     end
@@ -172,7 +172,7 @@ describe EventDrop do
     @event.created_at = Time.now
     @event.payload = {
       'title' => 'some title',
-      'url' => 'http://some.site.example.org/',
+      'url' => 'http://some.site.example.org/'
     }
     @event.lat = 2
     @event.lng = 3

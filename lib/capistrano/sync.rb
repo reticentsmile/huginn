@@ -33,7 +33,7 @@ namespace :sync do
       dump will be kept within the shared sync directory. The amount of backups that will be kept is
       declared in the sync_backups variable and defaults to 5.
     DESC
-    task :down, :roles => :db, :only => {:primary => true} do
+    task :down, roles: :db, only: {primary: true} do
       run "mkdir -p #{shared_path}/sync"
 
       env = fetch :rails_env, 'production'
@@ -48,7 +48,7 @@ namespace :sync do
       puts "database: #{database}"
 
       opts = "-c --max_allowed_packet=128M --hex-blob --single-transaction --skip-extended-insert --quick"
-      run "mysqldump #{opts} -u #{username} --password='#{password}' #{hostcmd} #{database} | bzip2 -9 > #{shared_path}/sync/#{filename}" do |channel, stream, data|
+      run "mysqldump #{opts} -u #{username} --password='#{password}' #{hostcmd} #{database} | bzip2 -9 > #{shared_path}/sync/#{filename}" do |_channel, _stream, data|
         puts data
       end
       purge_old_backups "database"
@@ -72,8 +72,7 @@ namespace :sync do
       Sync declared remote directories to the local development environment. The synced directories must be declared
       as an array of Strings with the sync_directories variable. The path is relative to the rails root.
     DESC
-    task :down, :roles => :web, :once => true do
-
+    task :down, roles: :web, once: true do
       server, port = host_and_port
 
       Array(fetch(:sync_directories, [])).each do |syncdir|
@@ -83,7 +82,7 @@ namespace :sync do
         end
         logger.info "sync #{syncdir} from #{server}:#{port} to local"
         destination, base = Pathname.new(syncdir).split
-        system "rsync --verbose --archive --compress --copy-links --delete --stats --rsh='ssh -p #{port}' #{user}@#{server}:#{current_path}/#{syncdir} #{destination.to_s}"
+        system "rsync --verbose --archive --compress --copy-links --delete --stats --rsh='ssh -p #{port}' #{user}@#{server}:#{current_path}/#{syncdir} #{destination}"
       end
 
       logger.important "sync filesystem from remote to local finished"
@@ -97,13 +96,11 @@ namespace :sync do
     end
 
     def with_loaded_env
-      begin
-        saved_env = ENV.to_hash.dup
-        ENV.update(@env)
-        yield
-      ensure
-        ENV.replace(saved_env)
-      end
+      saved_env = ENV.to_hash.dup
+      ENV.update(@env)
+      yield
+    ensure
+      ENV.replace(saved_env)
     end
   end
 
@@ -118,10 +115,10 @@ namespace :sync do
 
     database = nil
     EnvLoader.new(local_env).with_loaded_env do
-      database = YAML::load(ERB.new(local_config).result)
+      database = YAML.load(ERB.new(local_config).result)
     end
 
-    return database["#{db}"]['username'], database["#{db}"]['password'], database["#{db}"]['database'], database["#{db}"]['host']
+    [database["#{db}"]['username'], database["#{db}"]['password'], database["#{db}"]['database'], database["#{db}"]['host']]
   end
 
   #
@@ -135,17 +132,17 @@ namespace :sync do
 
     database = nil
     EnvLoader.new(remote_env).with_loaded_env do
-      database = YAML::load(ERB.new(remote_config).result)
+      database = YAML.load(ERB.new(remote_config).result)
     end
 
-    return database["#{db}"]['username'], database["#{db}"]['password'], database["#{db}"]['database'], database["#{db}"]['host']
+    [database["#{db}"]['username'], database["#{db}"]['password'], database["#{db}"]['database'], database["#{db}"]['host']]
   end
 
   #
   # Returns the actual host name to sync and port
   #
   def host_and_port
-    return roles[:web].servers.first.host, ssh_options[:port] || roles[:web].servers.first.port || 22
+    [roles[:web].servers.first.host, ssh_options[:port] || roles[:web].servers.first.port || 22]
   end
 
   #

@@ -61,7 +61,7 @@ module Agents
       errors.add(:base, "username is required") unless options['username'].present?
       errors.add(:base, "expected_update_period_in_days is required") unless options['expected_update_period_in_days'].present?
 
-      if options[:include_retweets].present? && !%w[true false].include?(options[:include_retweets])
+      if options[:include_retweets].present? && !%w(true false).include?(options[:include_retweets])
         errors.add(:base, "include_retweets must be a boolean value string (true/false)")
       end
 
@@ -84,8 +84,8 @@ module Agents
 
     def check
       since_id = memory['since_id'] || nil
-      opts = {:count => 200, :include_rts => include_retweets?, :exclude_replies => false, :include_entities => true, :contributor_details => true}
-      opts.merge! :since_id => since_id unless since_id.nil?
+      opts = {count: 200, include_rts: include_retweets?, exclude_replies: false, include_entities: true, contributor_details: true}
+      opts.merge! since_id: since_id unless since_id.nil?
 
       # http://rdoc.info/gems/twitter/Twitter/REST/Timelines#user_timeline-instance_method
       tweets = twitter.user_timeline(interpolated['username'], opts)
@@ -94,7 +94,7 @@ module Agents
         if tweet.created_at >= starting_at
           memory['since_id'] = tweet.id if !memory['since_id'] || (tweet.id > memory['since_id'])
 
-          create_event :payload => tweet.attrs
+          create_event payload: tweet.attrs
         end
       end
 

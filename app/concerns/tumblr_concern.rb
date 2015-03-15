@@ -30,7 +30,7 @@ module TumblrConcern
       config.oauth_token = tumblr_oauth_token
       config.oauth_token_secret = tumblr_oauth_token_secret
     end
-    
+
     Tumblr::Client.new
   end
 end

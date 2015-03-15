@@ -78,9 +78,7 @@ module Agents
     MD
 
     def default_options
-      super.update({
-        'schedule' => '0 * * * *',
-      })
+      super.update('schedule' => '0 * * * *')
     end
 
     def working?
@@ -107,7 +105,7 @@ module Agents
     end
 
     before_save do
-      self.memory.delete('scheduled_at') if self.options_changed?
+      memory.delete('scheduled_at') if self.options_changed?
     end
   end
 end

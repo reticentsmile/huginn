@@ -46,13 +46,13 @@ module Agents
     end
 
     def deliver(text)
-      client.send Jabber::Message::new(interpolated['jabber_receiver'], text).set_type(:chat)
+      client.send Jabber::Message.new(interpolated['jabber_receiver'], text).set_type(:chat)
     end
 
     private
 
     def client
-      Jabber::Client.new(Jabber::JID::new(interpolated['jabber_sender'])).tap do |sender|
+      Jabber::Client.new(Jabber::JID.new(interpolated['jabber_sender'])).tap do |sender|
         sender.connect(interpolated['jabber_server'], interpolated['jabber_port'] || '5222')
         sender.auth interpolated['jabber_password']
       end

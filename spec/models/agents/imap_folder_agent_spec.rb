@@ -14,7 +14,7 @@ describe Agents::ImapFolderAgent do
         'conditions' => {
         }
       }
-      @checker = Agents::ImapFolderAgent.new(:name => 'Example', :options => @site, :keep_events_for => 2)
+      @checker = Agents::ImapFolderAgent.new(name: 'Example', options: @site, keep_events_for: 2)
       @checker.user = users(:bob)
       @checker.save!
 
@@ -31,7 +31,7 @@ describe Agents::ImapFolderAgent do
           false
         end
 
-        def body_parts(mime_types = %[text/plain text/enriched text/html])
+        def body_parts(mime_types = %(text/plain text/enriched text/html))
           mime_types.map { |type|
             all_parts.find { |part|
               part.mime_type == type
@@ -49,7 +49,7 @@ describe Agents::ImapFolderAgent do
           mail.extend(message_mixin)
           stub(mail).uid.returns(2)
           stub(mail).has_attachment?.returns(true)
-        },
+        }
       ]
 
       stub(@checker).each_unread_mail.returns { |yielder|
@@ -75,7 +75,7 @@ describe Agents::ImapFolderAgent do
           'body' => "Some plain text\nSome second line\n",
           'has_attachment' => false,
           'matches' => {},
-          'mime_type' => 'text/plain',
+          'mime_type' => 'text/plain'
         },
         {
           'folder' => 'INBOX',
@@ -87,7 +87,7 @@ describe Agents::ImapFolderAgent do
           'date' => '2014-05-09T17:00:00+09:00',
           'has_attachment' => true,
           'matches' => {},
-          'mime_type' => 'text/plain',
+          'mime_type' => 'text/plain'
         }
       ]
     end
@@ -118,7 +118,7 @@ describe Agents::ImapFolderAgent do
       end
 
       it 'should validate the boolean fields' do
-        %w[ssl mark_as_read].each do |key|
+        %w(ssl mark_as_read).each do |key|
           @checker.options[key] = 1
           expect(@checker).not_to be_valid
 
@@ -182,7 +182,7 @@ describe Agents::ImapFolderAgent do
       it 'should perform regexp matching and save named captures' do
         @checker.options['conditions'].update(
           'subject' => '\ARe: (?<a>.+)',
-          'body'    => 'Some (?<b>.+) reply',
+          'body'    => 'Some (?<b>.+) reply'
         )
 
         expect { @checker.check }.to change { Event.count }.by(1)
@@ -192,9 +192,9 @@ describe Agents::ImapFolderAgent do
         })
 
         expect(Event.last.payload).to eq(@payloads.last.update(
-          'body' => "<div dir=\"ltr\">Some HTML reply<br></div>\n",
-          'matches' => { 'a' => 'some subject', 'b' => 'HTML' },
-          'mime_type' => 'text/html',
+                                           'body' => "<div dir=\"ltr\">Some HTML reply<br></div>\n",
+                                           'matches' => { 'a' => 'some subject', 'b' => 'HTML' },
+                                           'mime_type' => 'text/html'
         ))
 
         expect { @checker.check }.not_to change { Event.count }
@@ -217,10 +217,10 @@ describe Agents::ImapFolderAgent do
       end
 
       it 'should narrow mail parts by MIME types' do
-        @checker.options['mime_types'] = %w[text/plain]
+        @checker.options['mime_types'] = %w(text/plain)
         @checker.options['conditions'].update(
           'subject' => '\ARe: (?<a>.+)',
-          'body'    => 'Some (?<b>.+) reply',
+          'body'    => 'Some (?<b>.+) reply'
         )
 
         expect { @checker.check }.not_to change { Event.count }

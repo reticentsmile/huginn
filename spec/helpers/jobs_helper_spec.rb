@@ -22,11 +22,11 @@ describe JobsHelper do
 
   describe '#relative_distance_of_time_in_words' do
     it "in the past" do
-      expect(relative_distance_of_time_in_words(Time.now-5.minutes)).to eq('5m ago')
+      expect(relative_distance_of_time_in_words(Time.now - 5.minutes)).to eq('5m ago')
     end
 
     it "in the future" do
-      expect(relative_distance_of_time_in_words(Time.now+5.minutes)).to eq('in 5m')
+      expect(relative_distance_of_time_in_words(Time.now + 5.minutes)).to eq('in 5m')
     end
   end
 end

@@ -16,20 +16,20 @@ class TwitterStream
     filters = filters.map(&:downcase).uniq
 
     stream = Twitter::JSONStream.connect(
-      :path    => "/1/statuses/#{(filters && filters.length > 0) ? 'filter' : 'sample'}.json#{"?track=#{filters.map {|f| CGI::escape(f) }.join(",")}" if filters && filters.length > 0}",
-      :ssl     => true,
-      :oauth   => {
-        :consumer_key    => agent.twitter_consumer_key,
-        :consumer_secret => agent.twitter_consumer_secret,
-        :access_key      => agent.twitter_oauth_token,
-        :access_secret   => agent.twitter_oauth_token_secret
+      path: "/1/statuses/#{(filters && filters.length > 0) ? 'filter' : 'sample'}.json#{"?track=#{filters.map { |f| CGI.escape(f) }.join(",")}" if filters && filters.length > 0}",
+      ssl: true,
+      oauth: {
+        consumer_key: agent.twitter_consumer_key,
+        consumer_secret: agent.twitter_consumer_secret,
+        access_key: agent.twitter_oauth_token,
+        access_secret: agent.twitter_oauth_token_secret
       }
     )
 
     stream.each_item do |status|
       status = JSON.parse(status) if status.is_a?(String)
       next unless status
-      next if status.has_key?('delete')
+      next if status.key?('delete')
       next unless status['text']
       status['text'] = status['text'].gsub(/&lt;/, "<").gsub(/&gt;/, ">").gsub(/[\t\n\r]/, '  ')
       block.call(status)
@@ -39,19 +39,19 @@ class TwitterStream
       STDERR.puts " --> Twitter error: #{message} <--"
     end
 
-    stream.on_no_data do |message|
+    stream.on_no_data do |_message|
       STDERR.puts " --> Got no data for awhile; trying to reconnect."
-      EventMachine::stop_event_loop
+      EventMachine.stop_event_loop
     end
 
-    stream.on_max_reconnects do |timeout, retries|
+    stream.on_max_reconnects do |_timeout, _retries|
       STDERR.puts " --> Oops, tried too many times! <--"
-      EventMachine::stop_event_loop
+      EventMachine.stop_event_loop
     end
   end
 
   def load_and_run(agents)
-    agents.group_by { |agent| agent.twitter_oauth_token }.each do |oauth_token, agents|
+    agents.group_by(&:twitter_oauth_token).each do |_oauth_token, agents|
       filter_to_agent_map = agents.map { |agent| agent.options[:filters] }.flatten.uniq.compact.map(&:strip).inject({}) { |m, f| m[f] = []; m }
 
       agents.each do |agent|
@@ -101,21 +101,21 @@ class TwitterStream
       begin
         agents = Agents::TwitterStreamAgent.active.all
 
-        EventMachine::run do
-          EventMachine.add_periodic_timer(1) {
-            EventMachine::stop_event_loop if !@running
-          }
+        EventMachine.run do
+          EventMachine.add_periodic_timer(1) do
+            EventMachine.stop_event_loop unless @running
+          end
 
-          EventMachine.add_periodic_timer(RELOAD_TIMEOUT) {
+          EventMachine.add_periodic_timer(RELOAD_TIMEOUT) do
             puts "Reloading EventMachine and all Agents..."
-            EventMachine::stop_event_loop
-          }
+            EventMachine.stop_event_loop
+          end
 
           if agents.length == 0
             puts "No agents found.  Will look again in a minute."
-            EventMachine.add_timer(60) {
-              EventMachine::stop_event_loop
-            }
+            EventMachine.add_timer(60) do
+              EventMachine.stop_event_loop
+            end
           else
             puts "Found #{agents.length} agent(s).  Loading them now..."
             load_and_run agents
@@ -123,7 +123,7 @@ class TwitterStream
         end
       rescue SignalException, SystemExit
         @running = false
-        EventMachine::stop_event_loop if EventMachine.reactor_running?
+        EventMachine.stop_event_loop if EventMachine.reactor_running?
       rescue StandardError => e
         STDERR.puts "\nException #{e.message}:\n#{e.backtrace.join("\n")}\n\n"
         STDERR.puts "Waiting for a couple of minutes..."

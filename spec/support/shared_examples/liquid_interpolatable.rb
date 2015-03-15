@@ -16,38 +16,32 @@ shared_examples_for LiquidInterpolatable do
 
     @event = Event.new
     @event.agent = agents(:bob_weather_agent)
-    @event.payload = { :variable => 'hello', :hello_world => "Hello world"}
+    @event.payload = { variable: 'hello', hello_world: "Hello world"}
     @event.save!
   end
 
   describe "interpolating liquid templates" do
     it "should work" do
-      expect(@checker.interpolate_options(@checker.options, @event)).to eq({
-          "normal" => "just some normal text",
-          "variable" => "hello",
-          "text" => "Some test with an embedded hello",
-          "escape" => "This should be Hello+world"
-      })
+      expect(@checker.interpolate_options(@checker.options, @event)).to eq("normal" => "just some normal text",
+                                                                           "variable" => "hello",
+                                                                           "text" => "Some test with an embedded hello",
+                                                                           "escape" => "This should be Hello+world")
     end
 
     it "should work with arrays", focus: true do
       @checker.options = {"value" => ["{{variable}}", "Much array", "Hey, {{hello_world}}"]}
-      expect(@checker.interpolate_options(@checker.options, @event)).to eq({
-        "value" => ["hello", "Much array", "Hey, Hello world"]
-      })
+      expect(@checker.interpolate_options(@checker.options, @event)).to eq("value" => ["hello", "Much array", "Hey, Hello world"])
     end
 
     it "should work recursively" do
       @checker.options['hash'] = {'recursive' => "{{variable}}"}
-      @checker.options['indifferent_hash'] = ActiveSupport::HashWithIndifferentAccess.new({'recursive' => "{{variable}}"})
-      expect(@checker.interpolate_options(@checker.options, @event)).to eq({
-          "normal" => "just some normal text",
-          "variable" => "hello",
-          "text" => "Some test with an embedded hello",
-          "escape" => "This should be Hello+world",
-          "hash" => {'recursive' => 'hello'},
-          "indifferent_hash" => {'recursive' => 'hello'},
-      })
+      @checker.options['indifferent_hash'] = ActiveSupport::HashWithIndifferentAccess.new('recursive' => "{{variable}}")
+      expect(@checker.interpolate_options(@checker.options, @event)).to eq("normal" => "just some normal text",
+                                                                           "variable" => "hello",
+                                                                           "text" => "Some test with an embedded hello",
+                                                                           "escape" => "This should be Hello+world",
+                                                                           "hash" => {'recursive' => 'hello'},
+                                                                           "indifferent_hash" => {'recursive' => 'hello'})
     end
 
     it "should work for strings" do
@@ -77,7 +71,7 @@ shared_examples_for LiquidInterpolatable do
 
       expect(@checker.interpolated['properties']).to eq(' ')
 
-      @checker.interpolate_with({ '_foo_' => 'That was', '_bar_' => 'nice.' }) {
+      @checker.interpolate_with('_foo_' => 'That was', '_bar_' => 'nice.') {
         expect(@checker.interpolated['properties']).to eq('That was nice.')
       }
 

@@ -4,7 +4,7 @@ module Agents
     cannot_receive_events!
 
     description  do
-        <<-MD
+      <<-MD
         Use this Agent to create events by receiving webhooks from any source.
 
         In order to create events with this agent, make a POST request to:
@@ -37,12 +37,12 @@ module Agents
         "payload_path" => "payload"}
     end
 
-    def receive_web_request(params, method, format)
+    def receive_web_request(params, method, _format)
       secret = params.delete('secret')
       return ["Please use POST requests only", 401] unless method == "post"
       return ["Not Authorized", 401] unless secret == interpolated['secret']
 
-      create_event(:payload => payload_for(params))
+      create_event(payload: payload_for(params))
 
       ['Event Created', 201]
     end

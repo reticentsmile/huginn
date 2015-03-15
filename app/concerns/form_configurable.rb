@@ -3,7 +3,7 @@ module FormConfigurable
 
   included do
     class_attribute :_form_configurable_fields
-    self._form_configurable_fields = HashWithIndifferentAccess.new { |h,k| h[k] = [] }
+    self._form_configurable_fields = HashWithIndifferentAccess.new { |h, k| h[k] = [] }
   end
 
   delegate :form_configurable_attributes, to: :class
@@ -15,7 +15,7 @@ module FormConfigurable
 
   def validate_option(method)
     if self.respond_to? "validate_#{method}".to_sym
-      self.send("validate_#{method}".to_sym)
+      send("validate_#{method}".to_sym)
     else
       false
     end
@@ -23,7 +23,7 @@ module FormConfigurable
 
   def complete_option(method)
     if self.respond_to? "complete_#{method}".to_sym
-      self.send("complete_#{method}".to_sym)
+      send("complete_#{method}".to_sym)
     end
   end
 
@@ -36,7 +36,7 @@ module FormConfigurable
       end
 
       if options[:type] == :array && (options[:values].blank? || !options[:values].is_a?(Array))
-        raise ArgumentError.new('When using :array as :type you need to provide the :values as an Array')
+        fail ArgumentError.new('When using :array as :type you need to provide the :values as an Array')
       end
 
       if options[:roles].is_a?(Symbol)
@@ -56,7 +56,7 @@ module FormConfigurable
     end
 
     def form_configurable_fields
-      self._form_configurable_fields
+      _form_configurable_fields
     end
 
     def form_configurable_attributes

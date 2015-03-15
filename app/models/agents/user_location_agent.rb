@@ -44,7 +44,7 @@ module Agents
       {
         'secret' => SecureRandom.hex(7),
         'max_accuracy' => '',
-        'min_distance' => '',
+        'min_distance' => ''
       }
     end
 
@@ -60,7 +60,7 @@ module Agents
       end
     end
 
-    def receive_web_request(params, method, format)
+    def receive_web_request(params, method, _format)
       params = params.symbolize_keys
       if method != 'post'
         return ['Not Found', 404]
@@ -71,7 +71,7 @@ module Agents
 
       handle_payload params.except(:secret)
 
-      return ['ok', 200]
+      ['ok', 200]
     end
 
     private

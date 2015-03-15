@@ -31,7 +31,7 @@ module WebRequestConcern
       }
     }
 
-    @faraday ||= Faraday.new(faraday_options) { |builder|
+    @faraday ||= Faraday.new(faraday_options) do |builder|
       builder.headers = headers if headers.length > 0
 
       builder.headers[:user_agent] = user_agent
@@ -47,7 +47,7 @@ module WebRequestConcern
           require 'typhoeus/adapters/faraday'
       end
       builder.adapter backend
-    }
+    end
   end
 
   def headers(value = interpolated['headers'])
@@ -63,7 +63,7 @@ module WebRequestConcern
       when /:/
         return value.split(/:/, 2)
     end
-    raise ArgumentError.new("bad value for basic_auth: #{value.inspect}")
+    fail ArgumentError.new("bad value for basic_auth: #{value.inspect}")
   end
 
   def faraday_backend

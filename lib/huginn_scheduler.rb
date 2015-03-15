@@ -30,9 +30,9 @@ class Rufus::Scheduler
 
   # Get a job tied to a given SchedulerAgent
   def scheduler_agent_job(agent)
-    scheduler_agent_jobs.find { |job|
+    scheduler_agent_jobs.find do |job|
       job.scheduler_agent_id == agent.id
-    }
+    end
   end
 
   # Schedule or reschedule a job for a given SchedulerAgent and return
@@ -81,14 +81,14 @@ class Rufus::Scheduler
   # Schedule or reschedule jobs for all SchedulerAgents and unschedule
   # orphaned jobs if any.
   def schedule_scheduler_agents
-    scheduled_jobs = Agent.of_type(Agents::SchedulerAgent).map { |scheduler_agent|
+    scheduled_jobs = Agent.of_type(Agents::SchedulerAgent).map do |scheduler_agent|
       schedule_scheduler_agent(scheduler_agent)
-    }.compact
+    end.compact
 
-    (scheduler_agent_jobs - scheduled_jobs).each { |job|
+    (scheduler_agent_jobs - scheduled_jobs).each do |job|
       puts "Unscheduling SchedulerAgent##{job.scheduler_agent_id} (orphaned)"
       job.unschedule
-    }
+    end
   end
 end
 
@@ -124,7 +124,7 @@ class HuginnScheduler
     end
 
     # Schedule repeating events.
-    %w[1m 2m 5m 10m 30m 1h 2h 5h 12h 1d 2d 7d].each do |schedule|
+    %w(1m 2m 5m 10m 30m 1h 2h 5h 12h 1d 2d 7d).each do |schedule|
       @rufus_scheduler.every schedule do
         run_schedule "every_#{schedule}"
       end

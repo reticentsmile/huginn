@@ -39,7 +39,7 @@ module Agents
     end
 
     def check
-      create_event :payload => fetch_stubhub_data(url)
+      create_event payload: fetch_stubhub_data(url)
     end
 
     def fetch_stubhub_data(url)
@@ -47,7 +47,6 @@ module Agents
     end
 
     class StubhubFetcher
-
       def self.call(url)
         new(url).fields
       end
@@ -61,7 +60,7 @@ module Agents
       end
 
       def base_url
-       'http://www.stubhub.com/listingCatalog/select/?q='
+        'http://www.stubhub.com/listingCatalog/select/?q='
       end
 
       def build_url
@@ -94,7 +93,6 @@ module Agents
       private
 
       attr_reader :url
-
     end
   end
 end

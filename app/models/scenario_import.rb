@@ -7,7 +7,7 @@ class ScenarioImport
   include ActiveModel::Callbacks
   include ActiveModel::Validations::Callbacks
 
-  DANGEROUS_AGENT_TYPES = %w[Agents::ShellCommandAgent]
+  DANGEROUS_AGENT_TYPES = %w(Agents::ShellCommandAgent)
   URL_REGEX = /\Ahttps?:\/\//i
 
   attr_accessor :file, :url, :data, :do_import, :merges
@@ -18,7 +18,7 @@ class ScenarioImport
   before_validation :fetch_url
 
   validate :validate_presence_of_file_url_or_data
-  validates_format_of :url, :with => URL_REGEX, :allow_nil => true, :allow_blank => true, :message => "appears to be invalid"
+  validates_format_of :url, with: URL_REGEX, allow_nil: true, allow_blank: true, message: "appears to be invalid"
   validate :validate_data
   validate :generate_diff
 
@@ -35,7 +35,7 @@ class ScenarioImport
   end
 
   def existing_scenario
-    @existing_scenario ||= user.scenarios.find_by(:guid => parsed_data["guid"])
+    @existing_scenario ||= user.scenarios.find_by(guid: parsed_data["guid"])
   end
 
   def dangerous?
@@ -63,20 +63,20 @@ class ScenarioImport
     tag_fg_color = parsed_data['tag_fg_color']
     tag_bg_color = parsed_data['tag_bg_color']
     source_url = parsed_data['source_url'].presence || nil
-    @scenario = user.scenarios.where(:guid => guid).first_or_initialize
-    @scenario.update_attributes!(:name => name, :description => description,
-                                 :source_url => source_url, :public => false,
-                                 :tag_fg_color => tag_fg_color,
-                                 :tag_bg_color => tag_bg_color)
+    @scenario = user.scenarios.where(guid: guid).first_or_initialize
+    @scenario.update_attributes!(name: name, description: description,
+                                 source_url: source_url, public: false,
+                                 tag_fg_color: tag_fg_color,
+                                 tag_bg_color: tag_bg_color)
 
     unless options[:skip_agents]
       created_agents = agent_diffs.map do |agent_diff|
         agent = agent_diff.agent || Agent.build_for_type("Agents::" + agent_diff.type.incoming, user)
         agent.guid = agent_diff.guid.incoming
-        agent.attributes = { :name => agent_diff.name.updated,
-                             :disabled => agent_diff.disabled.updated, # == "true"
-                             :options => agent_diff.options.updated,
-                             :scenario_ids => [@scenario.id] }
+        agent.attributes = { name: agent_diff.name.updated,
+                             disabled: agent_diff.disabled.updated, # == "true"
+                             options: agent_diff.options.updated,
+                             scenario_ids: [@scenario.id] }
         agent.schedule = agent_diff.schedule.updated if agent_diff.schedule.present?
         agent.keep_events_for = agent_diff.keep_events_for.updated if agent_diff.keep_events_for.present?
         agent.propagate_immediately = agent_diff.propagate_immediately.updated if agent_diff.propagate_immediately.present? # == "true"
@@ -124,7 +124,7 @@ class ScenarioImport
   def validate_data
     if data.present?
       @parsed_data = JSON.parse(data) rescue {}
-      if (%w[name guid agents] - @parsed_data.keys).length > 0
+      if (%w(name guid agents) - @parsed_data.keys).length > 0
         errors.add(:base, "The provided data does not appear to be a valid Scenario.")
         self.data = nil
       end
@@ -145,7 +145,7 @@ class ScenarioImport
       agent_diff = AgentDiff.new(agent_data)
       if existing_scenario
         # If this Agent exists already, update the AgentDiff with the local version's information.
-        agent_diff.diff_with! existing_scenario.agents.find_by(:guid => agent_data['guid'])
+        agent_diff.diff_with! existing_scenario.agents.find_by(guid: agent_data['guid'])
 
         begin
           # Update the AgentDiff with any hand-merged changes coming from the UI.  This only happens when this
@@ -191,7 +191,7 @@ class ScenarioImport
       store! agent_data
     end
 
-    BASE_FIELDS = %w[name schedule keep_events_for propagate_immediately disabled guid]
+    BASE_FIELDS = %w(name schedule keep_events_for propagate_immediately disabled guid)
 
     def agent_exists?
       !!agent
@@ -209,7 +209,7 @@ class ScenarioImport
       self.type = FieldDiff.new(agent_data["type"].split("::").pop)
       self.options = FieldDiff.new(agent_data['options'] || {})
       BASE_FIELDS.each do |option|
-        self[option] = FieldDiff.new(agent_data[option]) if agent_data.has_key?(option)
+        self[option] = FieldDiff.new(agent_data[option]) if agent_data.key?(option)
       end
     end
 
@@ -233,7 +233,7 @@ class ScenarioImport
     end
 
     def update_from!(merges)
-      each_field do |field, value, selection_options|
+      each_field do |field, value, _selection_options|
         value.updated = merges[field]
       end
 
@@ -243,9 +243,9 @@ class ScenarioImport
     end
 
     def each_field
-      boolean = [["True", "true"], ["False", "false"]]
+      boolean = [%w(True true), %w(False false)]
       yield 'name', name if name.requires_merge?
-      yield 'schedule', schedule, Agent::SCHEDULES.map {|s| [s.humanize.titleize, s] } if self['schedule'].present? && schedule.requires_merge?
+      yield 'schedule', schedule, Agent::SCHEDULES.map { |s| [s.humanize.titleize, s] } if self['schedule'].present? && schedule.requires_merge?
       yield 'keep_events_for', keep_events_for, Agent::EVENT_RETENTION_SCHEDULES if self['keep_events_for'].present? && keep_events_for.requires_merge?
       yield 'propagate_immediately', propagate_immediately, boolean if self['propagate_immediately'].present? && propagate_immediately.requires_merge?
       yield 'disabled', disabled, boolean if disabled.requires_merge?
@@ -254,11 +254,11 @@ class ScenarioImport
     # Unfortunately Ruby 1.9's OpenStruct doesn't expose [] and []=.
     unless instance_methods.include?(:[]=)
       def [](key)
-        self.send(sanitize key)
+        send(sanitize key)
       end
 
       def []=(key, val)
-        self.send("#{sanitize key}=", val)
+        send("#{sanitize key}=", val)
       end
 
       def sanitize(key)
@@ -267,7 +267,7 @@ class ScenarioImport
     end
 
     def agent_instance
-      "Agents::#{self.type.updated}".constantize.new
+      "Agents::#{type.updated}".constantize.new
     end
   end
 end

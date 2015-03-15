@@ -25,9 +25,9 @@ module Agents
 
     def default_options
       {
-          'subject' => "You have a notification!",
-          'headline' => "Your notification:",
-          'expected_receive_period_in_days' => "2"
+        'subject' => "You have a notification!",
+        'headline' => "Your notification:",
+        'expected_receive_period_in_days' => "2"
       }
     end
 
@@ -35,7 +35,7 @@ module Agents
       incoming_events.each do |event|
         log "Sending digest mail to #{user.email} with event #{event.id}"
         recipients(event.payload).each do |recipient|
-          SystemMailer.delay.send_message(:to => recipient, :subject => interpolated(event)['subject'], :headline => interpolated(event)['headline'], :body => interpolated(event)['body'], :groups => [present(event.payload)])
+          SystemMailer.delay.send_message(to: recipient, subject: interpolated(event)['subject'], headline: interpolated(event)['headline'], body: interpolated(event)['body'], groups: [present(event.payload)])
         end
       end
     end

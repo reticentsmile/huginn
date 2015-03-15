@@ -48,17 +48,17 @@ module Agents
     MD
 
     def check_url
-      stop_query = URI.encode(interpolated["stops"].collect{|a| "&stops=#{a}"}.join)
+      stop_query = URI.encode(interpolated["stops"].collect { |a| "&stops=#{a}" }.join)
       "http://webservices.nextbus.com/service/publicXMLFeed?command=predictionsForMultiStops&a=#{interpolated["agency"]}#{stop_query}"
     end
 
     def stops
-      interpolated["stops"].collect{|a| a.split("|").last}
+      interpolated["stops"].collect { |a| a.split("|").last }
     end
 
     def check
       hydra = Typhoeus::Hydra.new
-      request = Typhoeus::Request.new(check_url, :followlocation => true)
+      request = Typhoeus::Request.new(check_url, followlocation: true)
       request.on_success do |response|
         page = Nokogiri::XML response.body
         predictions = page.css("//prediction")
@@ -68,7 +68,7 @@ module Agents
           if pr["minutes"] && pr["minutes"].to_i < interpolated["alert_window_in_minutes"].to_i
             vals = vals.merge Hash.from_xml(pr.to_xml)
             if not_already_in_memory?(vals)
-              create_event(:payload => vals)
+              create_event(payload: vals)
               log "creating event..."
               update_memory(vals)
             else
@@ -87,21 +87,22 @@ module Agents
     end
 
     def cleanup_old_memory
-      self.memory["existing_routes"] ||= []
-      self.memory["existing_routes"].reject!{|h| h["currentTime"].to_time <= (Time.now - 2.hours)}
+      memory["existing_routes"] ||= []
+      memory["existing_routes"].reject! { |h| h["currentTime"].to_time <= (Time.now - 2.hours) }
     end
 
     def add_to_memory(vals)
-      self.memory["existing_routes"] ||= []
-      self.memory["existing_routes"] << {"stopTag" => vals["stopTag"], "tripTag" => vals["prediction"]["tripTag"], "epochTime" => vals["prediction"]["epochTime"], "currentTime" => Time.now}
+      memory["existing_routes"] ||= []
+      memory["existing_routes"] << {"stopTag" => vals["stopTag"], "tripTag" => vals["prediction"]["tripTag"], "epochTime" => vals["prediction"]["epochTime"], "currentTime" => Time.now}
     end
 
     def not_already_in_memory?(vals)
-      m = self.memory["existing_routes"] || []
-      m.select{|h| h['stopTag'] == vals["stopTag"] &&
-                h['tripTag'] == vals["prediction"]["tripTag"] &&
-                h['epochTime'] == vals["prediction"]["epochTime"]
-              }.count == 0
+      m = memory["existing_routes"] || []
+      m.select do|h|
+        h['stopTag'] == vals["stopTag"] &&
+          h['tripTag'] == vals["prediction"]["tripTag"] &&
+          h['epochTime'] == vals["prediction"]["epochTime"]
+      end.count == 0
     end
 
     def default_options

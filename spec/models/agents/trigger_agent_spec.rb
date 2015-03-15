@@ -7,10 +7,10 @@ describe Agents::TriggerAgent do
       'options' => {
         'expected_receive_period_in_days' => 2,
         'rules' => [{
-                      'type' => "regex",
-                      'value' => "a\\db",
-                      'path' => "foo.bar.baz",
-                    }],
+          'type' => "regex",
+          'value' => "a\\db",
+          'path' => "foo.bar.baz"
+        }],
         'message' => "I saw '{{foo.bar.baz}}' from {{name}}"
       }
     }
@@ -99,7 +99,7 @@ describe Agents::TriggerAgent do
       @checker.options['rules'][0] = {
         'type' => "regex",
         'value' => ["a\\db", "a\\Wb"],
-        'path' => "foo.bar.baz",
+        'path' => "foo.bar.baz"
       }
       expect {
         @checker.receive([@event])
@@ -121,7 +121,7 @@ describe Agents::TriggerAgent do
       @checker.options['rules'][0] = {
         'type' => "!regex",
         'value' => "a\\db",
-        'path' => "foo.bar.baz",
+        'path' => "foo.bar.baz"
       }
 
       expect {
@@ -139,7 +139,7 @@ describe Agents::TriggerAgent do
       @checker.options['rules'][0] = {
         'type' => "!regex",
         'value' => ["a\\db", "a2b"],
-        'path' => "foo.bar.baz",
+        'path' => "foo.bar.baz"
       }
 
       expect {
@@ -331,7 +331,7 @@ describe Agents::TriggerAgent do
 
         @checker.receive([@event])
 
-        expect(@checker.most_recent_event.payload).to eq(@event.payload.merge(:message => "I saw '5' from Joe"))
+        expect(@checker.most_recent_event.payload).to eq(@event.payload.merge(message: "I saw '5' from Joe"))
       end
     end
   end

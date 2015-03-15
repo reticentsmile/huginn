@@ -3,21 +3,21 @@ require 'spec_helper'
 describe Agents::HipchatAgent do
   before(:each) do
     @valid_params = {
-                      'auth_token' => 'token',
-                      'room_name' => 'test',
-                      'username' => "{{username}}",
-                      'message' => "{{message}}",
-                      'notify' => 'false',
-                      'color' => 'yellow',
-                    }
+      'auth_token' => 'token',
+      'room_name' => 'test',
+      'username' => "{{username}}",
+      'message' => "{{message}}",
+      'notify' => 'false',
+      'color' => 'yellow'
+    }
 
-    @checker = Agents::HipchatAgent.new(:name => "somename", :options => @valid_params)
+    @checker = Agents::HipchatAgent.new(name: "somename", options: @valid_params)
     @checker.user = users(:jane)
     @checker.save!
 
     @event = Event.new
     @event.agent = agents(:bob_weather_agent)
-    @event.payload = { :room_name => 'test room', :message => 'Looks like its going to rain', username: "Huggin user                  "}
+    @event.payload = { room_name: 'test room', message: 'Looks like its going to rain', username: "Huggin user                  "}
     @event.save!
   end
 
@@ -45,7 +45,7 @@ describe Agents::HipchatAgent do
     it "should also allow a credential" do
       @checker.options['auth_token'] = nil
       expect(@checker).not_to be_valid
-      @checker.user.user_credentials.create :credential_name => 'hipchat_auth_token', :credential_value => 'something'
+      @checker.user.user_credentials.create credential_name: 'hipchat_auth_token', credential_value: 'something'
       expect(@checker.reload).to be_valid
     end
   end
@@ -60,7 +60,7 @@ describe Agents::HipchatAgent do
 
     it "should return false when invalid" do
       any_instance_of(HipChat::Client) do |klass|
-        stub(klass).rooms { raise HipChat::UnknownResponseCode.new }
+        stub(klass).rooms { fail HipChat::UnknownResponseCode.new }
       end
       expect(@checker.validate_auth_token).to be false
     end
@@ -71,14 +71,14 @@ describe Agents::HipchatAgent do
       any_instance_of(HipChat::Client) do |klass|
         stub(klass).rooms { [OpenStruct.new(name: 'test'), OpenStruct.new(name: 'test1')] }
       end
-      expect(@checker.complete_room_name).to eq [{text: 'test', id: 'test'},{text: 'test1', id: 'test1'}]
+      expect(@checker.complete_room_name).to eq [{text: 'test', id: 'test'}, {text: 'test1', id: 'test1'}]
     end
   end
 
   describe "#receive" do
     it "send a message to the hipchat" do
       any_instance_of(HipChat::Room) do |obj|
-        mock(obj).send(@event.payload[:username][0..14], @event.payload[:message], {:notify => false, :color => 'yellow'})
+        mock(obj).send(@event.payload[:username][0..14], @event.payload[:message], notify: false, color: 'yellow')
       end
       @checker.receive([@event])
     end

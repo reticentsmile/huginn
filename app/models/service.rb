@@ -3,15 +3,15 @@ class Service < ActiveRecord::Base
 
   serialize :options, Hash
 
-  belongs_to :user, :inverse_of => :services
-  has_many :agents, :inverse_of => :service
+  belongs_to :user, inverse_of: :services
+  has_many :agents, inverse_of: :service
 
   validates_presence_of :user_id, :provider, :name, :token
 
   before_destroy :disable_agents
 
-  scope :available_to_user, lambda { |user| where("services.user_id = ? or services.global = true", user.id) }
-  scope :by_name, lambda { |dir = 'desc'| order("services.name #{dir}") }
+  scope :available_to_user, ->(user) { where("services.user_id = ? or services.global = true", user.id) }
+  scope :by_name, ->(dir = 'desc') { order("services.name #{dir}") }
 
   def disable_agents(conditions = {})
     agents.where.not(conditions[:where_not] || {}).each do |agent|
@@ -22,8 +22,8 @@ class Service < ActiveRecord::Base
   end
 
   def toggle_availability!
-    disable_agents(where_not: {user_id: self.user_id}) if global
-    self.global = !self.global
+    disable_agents(where_not: {user_id: user_id}) if global
+    self.global = !global
     self.save!
   end
 
@@ -35,17 +35,17 @@ class Service < ActiveRecord::Base
 
   def refresh_token!
     response = HTTParty.post(endpoint, query: {
-                  type:          'refresh',
-                  client_id:     oauth_key,
-                  client_secret: oauth_secret,
-                  refresh_token: refresh_token
-    })
+                               type:          'refresh',
+                               client_id:     oauth_key,
+                               client_secret: oauth_secret,
+                               refresh_token: refresh_token
+                             })
     data = JSON.parse(response.body)
     update(expires_at: Time.now + data['expires_in'], token: data['access_token'], refresh_token: data['refresh_token'].presence || refresh_token)
   end
 
   def endpoint
-    client_options = "OmniAuth::Strategies::#{OmniAuth::Utils.camelize(self.provider)}".constantize.default_options['client_options']
+    client_options = "OmniAuth::Strategies::#{OmniAuth::Utils.camelize(provider)}".constantize.default_options['client_options']
     URI.join(client_options['site'], client_options['token_url'])
   end
 

@@ -49,7 +49,6 @@ describe Agents::DropboxWatchAgent do
   end
 
   describe '#check' do
-
     let(:first_result) { [{ 'path' => '1.json', 'rev' => '1', 'modified' => '01-01-01' }] }
 
     before(:each) do
@@ -64,17 +63,14 @@ describe Agents::DropboxWatchAgent do
     end
 
     context 'first time' do
-
       before(:each) { @agent.memory = {} }
 
       it 'does not send any events' do
         expect { @agent.check }.to_not change(Event, :count)
       end
-
     end
 
     context 'subsequent calls' do
-
       let(:second_result) { [{ 'path' => '2.json', 'rev' => '1', 'modified' => '02-02-02' }] }
 
       before(:each) do
@@ -102,26 +98,27 @@ describe Agents::DropboxWatchAgent do
 
         expect { @agent.check }.to_not change(Event, :count)
       end
-
     end
   end
 
   describe Agents::DropboxWatchAgent::DropboxDirDiff do
+    let(:previous) {
+      [
+        { 'path' => '1.json', 'rev' => '1' },
+        { 'path' => '2.json', 'rev' => '1' },
+        { 'path' => '3.json', 'rev' => '1' }
+      ]
+    }
 
-    let(:previous) { [
-      { 'path' => '1.json', 'rev' => '1' },
-      { 'path' => '2.json', 'rev' => '1' },
-      { 'path' => '3.json', 'rev' => '1' }
-    ] }
-
-    let(:current) { [
-      { 'path' => '1.json', 'rev' => '2' },
-      { 'path' => '3.json', 'rev' => '1' },
-      { 'path' => '4.json', 'rev' => '1' }
-    ] }
+    let(:current) {
+      [
+        { 'path' => '1.json', 'rev' => '2' },
+        { 'path' => '3.json', 'rev' => '1' },
+        { 'path' => '4.json', 'rev' => '1' }
+      ]
+    }
 
     describe '#empty?' do
-
       it 'is true when no differences are detected' do
         diff = Agents::DropboxWatchAgent::DropboxDirDiff.new(previous, previous)
         expect(diff.empty?).to eq true
@@ -131,11 +128,9 @@ describe Agents::DropboxWatchAgent do
         diff = Agents::DropboxWatchAgent::DropboxDirDiff.new(previous, current)
         expect(diff.empty?).to eq false
       end
-
     end
 
     describe '#to_hash' do
-
       subject(:diff_hash) { Agents::DropboxWatchAgent::DropboxDirDiff.new(previous, current).to_hash }
 
       it 'detects additions' do
@@ -143,11 +138,11 @@ describe Agents::DropboxWatchAgent do
       end
 
       it 'detects removals' do
-        expect(diff_hash[:removed]).to eq [ { 'path' => '2.json', 'rev' => '1' } ]
+        expect(diff_hash[:removed]).to eq [{ 'path' => '2.json', 'rev' => '1' }]
       end
 
       it 'detects updates' do
-        expect(diff_hash[:updated]).to eq [ { 'path' => '1.json', 'rev' => '2' } ]
+        expect(diff_hash[:updated]).to eq [{ 'path' => '1.json', 'rev' => '2' }]
       end
 
       context 'when the previous value is not defined' do
@@ -169,5 +164,4 @@ describe Agents::DropboxWatchAgent do
       end
     end
   end
-
 end

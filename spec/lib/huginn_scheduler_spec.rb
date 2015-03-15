@@ -67,7 +67,6 @@ describe HuginnScheduler do
       expect(@keep.id).to eq(Delayed::Job.order(:failed_at)[0].id)
     end
 
-
     it "work without the FAILED_JOBS_TO_KEEP env variable" do
       old = ENV['FAILED_JOBS_TO_KEEP']
       ENV['FAILED_JOBS_TO_KEEP'] = nil

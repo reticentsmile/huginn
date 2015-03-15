@@ -3,7 +3,7 @@ class AgentsController < ApplicationController
   include SortableTable
 
   def index
-    set_table_sort sorts: %w[name last_check_at last_event_at last_receive_at], default: { name: :asc }
+    set_table_sort sorts: %w(name last_check_at last_event_at last_receive_at), default: { name: :asc }
 
     @agents = current_user.agents.preload(:scenarios, :controllers).reorder(table_sort).page(params[:page])
 
@@ -16,7 +16,7 @@ class AgentsController < ApplicationController
   def handle_details_post
     @agent = current_user.agents.find(params[:id])
     if @agent.respond_to?(:handle_details_post)
-      render :json => @agent.handle_details_post(params) || {}
+      render json: @agent.handle_details_post(params) || {}
     else
       @agent.error "#handle_details_post called on an instance of #{@agent.class} that does not define it."
       head 500
@@ -37,26 +37,26 @@ class AgentsController < ApplicationController
     @agent = Agent.build_for_type(params[:type], current_user, {})
     initialize_presenter
 
-    render :json => {
-        :can_be_scheduled => @agent.can_be_scheduled?,
-        :default_schedule => @agent.default_schedule,
-        :can_receive_events => @agent.can_receive_events?,
-        :can_create_events => @agent.can_create_events?,
-        :can_control_other_agents => @agent.can_control_other_agents?,
-        :options => @agent.default_options,
-        :description_html => @agent.html_description,
-        :oauthable => render_to_string(partial: 'oauth_dropdown', locals: { agent: @agent }),
-        :form_options => render_to_string(partial: 'options', locals: { agent: @agent })
+    render json: {
+      can_be_scheduled: @agent.can_be_scheduled?,
+      default_schedule: @agent.default_schedule,
+      can_receive_events: @agent.can_receive_events?,
+      can_create_events: @agent.can_create_events?,
+      can_control_other_agents: @agent.can_control_other_agents?,
+      options: @agent.default_options,
+      description_html: @agent.html_description,
+      oauthable: render_to_string(partial: 'oauth_dropdown', locals: { agent: @agent }),
+      form_options: render_to_string(partial: 'options', locals: { agent: @agent })
     }
   end
 
   def event_descriptions
-    html = current_user.agents.find(params[:ids].split(",")).group_by(&:type).map { |type, agents|
-      agents.map(&:html_event_description).uniq.map { |desc|
+    html = current_user.agents.find(params[:ids].split(",")).group_by(&:type).map do |type, agents|
+      agents.map(&:html_event_description).uniq.map do |desc|
         "<p><strong>#{type}</strong><br />" + desc + "</p>"
-      }
-    }.flatten.join()
-    render :json => { :description_html => html }
+      end
+    end.flatten.join
+    render json: { description_html: html }
   end
 
   def remove_events
@@ -181,7 +181,7 @@ class AgentsController < ApplicationController
   def redirect_back(message)
     if params[:return] == "show" && @agent && !@agent.destroyed?
       path = agent_path(@agent)
-    elsif params[:return] =~ /\A#{Regexp::escape scenarios_path}\/\d+\Z/
+    elsif params[:return] =~ /\A#{Regexp.escape scenarios_path}\/\d+\Z/
       path = params[:return]
     else
       path = agents_path

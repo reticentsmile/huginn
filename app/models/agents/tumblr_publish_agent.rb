@@ -17,9 +17,9 @@ module Agents
 
       **Required fields:**
 
-      `blog_name` Your Tumblr URL (e.g. "mustardhamsters.tumblr.com") 
+      `blog_name` Your Tumblr URL (e.g. "mustardhamsters.tumblr.com")
 
-      `post_type` One of [text, photo, quote, link, chat, audio, video] 
+      `post_type` One of [text, photo, quote, link, chat, audio, video]
 
 
       -------------
@@ -35,13 +35,13 @@ module Agents
       * `format` html, markdown
       * `slug` short text summary at end of the post URL
 
-      **Text** `title` `body` 
+      **Text** `title` `body`
 
       **Photo** `caption` `link`  `source`
 
       **Quote** `quote` `source`
 
-      **Link** `title` `url` `description` 
+      **Link** `title` `url` `description`
 
       **Chat** `title` `conversation`
 
@@ -89,8 +89,8 @@ module Agents
           'description' => "{{description}}",
           'conversation' => "{{conversation}}",
           'external_url' => "{{external_url}}",
-          'embed' => "{{embed}}",
-        },
+          'embed' => "{{embed}}"
+        }
       }
     end
 
@@ -105,9 +105,9 @@ module Agents
         options = interpolated(event)['options']
         begin
           post = publish_post(blog_name, post_type, options)
-          create_event :payload => {
+          create_event payload: {
             'success' => true,
-            'published_post' => "["+blog_name+"] "+post_type,
+            'published_post' => "[" + blog_name + "] " + post_type,
             'post_id' => post["id"],
             'agent_id' => event.agent_id,
             'event_id' => event.id
@@ -116,15 +116,15 @@ module Agents
       end
     end
 
-    def publish_post(blog_name, post_type, options)      
-      options_obj = { 
-          :state => options['state'],
-          :tags => options['tags'],
-          :tweet => options['tweet'],
-          :date => options['date'],
-          :format => options['format'],
-          :slug => options['slug'],
-        }
+    def publish_post(blog_name, post_type, options)
+      options_obj = {
+        state: options['state'],
+        tags: options['tags'],
+        tweet: options['tweet'],
+        date: options['date'],
+        format: options['format'],
+        slug: options['slug']
+      }
 
       case post_type
       when "text"
