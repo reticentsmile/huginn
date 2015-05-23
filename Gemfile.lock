@@ -1,4 +1,14 @@
 GIT
+  remote: git://github.com/cantino/twitter-stream.git
+  revision: f7e7edb0bae013bffabf3598e7147773d9fd370f
+  branch: huginn
+  specs:
+    twitter-stream (0.1.15)
+      eventmachine (~> 1.0.7)
+      http_parser.rb (~> 0.6.0)
+      simple_oauth (~> 0.3.0)
+
+GIT
   remote: git://github.com/cantino/weibo_2.git
   revision: 00e57d29d8252126014b038cd738b02e05e4cfc5
   branch: master
@@ -553,6 +563,7 @@ DEPENDENCIES
   tumblr_client
   twilio-ruby (~> 3.11.5)
   twitter (~> 5.14.0)
+  twitter-stream!
   typhoeus (~> 0.6.3)
   tzinfo (>= 1.2.0)
   tzinfo-data
