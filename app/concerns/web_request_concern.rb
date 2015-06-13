@@ -2,6 +2,20 @@ require 'faraday'
 require 'faraday_middleware'
 
 module WebRequestConcern
+  module DoNotEncoder
+    def self.encode(params)
+      buffer = ''
+      params.each do |key, value|
+        buffer << "#{key}=#{value}&"
+      end
+      return buffer.chop
+    end
+
+    def self.decode(val)
+      [val]
+    end
+  end
+
   extend ActiveSupport::Concern
 
   def validate_web_request_options!
@@ -38,6 +52,11 @@ module WebRequestConcern
 
       builder.use FaradayMiddleware::FollowRedirects
       builder.request :url_encoded
+
+      if boolify(options['disable_url_encoding'])
+        builder.options.params_encoder = DoNotEncoder
+      end
+
       if userinfo = basic_auth_credentials
         builder.request :basic_auth, *userinfo
       end
