@@ -118,6 +118,7 @@ end
 
 group :production do
   gem 'rack', '> 1.5.0'
+  gem 'unicorn', '~> 4.9.0'
 end
 
 # Platform requirements.
@@ -143,6 +144,5 @@ end
 
 on_heroku do
   gem 'pg'
-  gem 'unicorn'
   gem 'rails_12factor', group: :production
 end
